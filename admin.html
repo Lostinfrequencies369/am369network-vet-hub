@@ -31,7 +31,9 @@
     </div>
     <nav class="sb-nav">
       <a data-view="dashboard" class="active">📊 Dashboard</a>
+      <a data-view="content">✏️ Site Content</a>
       <a data-view="apps">🧩 Web Apps</a>
+      <a data-view="medicines">💊 Medicines</a>
       <a data-view="blogs">📝 Blogs</a>
       <a data-view="directories">📁 Directories</a>
       <a data-view="species">🐾 Species</a>
@@ -59,6 +61,29 @@
         <div class="panel">
           <div class="panel-head"><h3>Welcome</h3></div>
           <p style="color:var(--muted);margin:0">Manage web apps, blogs, directories and species from the sidebar. All changes save to this browser (LocalStorage). Use <b>Settings → Export</b> to download updated JSON and commit it to the repo so changes go live for everyone.</p>
+        </div>
+      </section>
+
+      <!-- SITE CONTENT -->
+      <section id="view-content" class="view">
+        <div class="panel">
+          <div class="panel-head"><h3>Editable Site Text</h3></div>
+          <p style="color:var(--muted);font-size:.85rem;margin:0 0 16px">Every heading, hero line and footer string on the public site lives here — change it and it updates the live site immediately (in this browser; export + commit to publish for everyone).</p>
+          <div id="content-form"></div>
+        </div>
+      </section>
+
+      <!-- MEDICINES -->
+      <section id="view-medicines" class="view">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Medicines &amp; Drug Records</h3>
+            <div style="display:flex;gap:10px">
+              <input class="table-search" id="medicines-search" placeholder="Search medicines…">
+              <button class="btn btn-primary btn-sm" id="add-medicine">+ Add Medicine</button>
+            </div>
+          </div>
+          <table><thead><tr><th>Name</th><th>Class</th><th>Species</th><th>Status</th><th>Actions</th></tr></thead><tbody id="medicines-tbody"></tbody></table>
         </div>
       </section>
 

@@ -157,6 +157,27 @@ footer.site b{color:var(--text);}
 .modal .meta{color:var(--muted); font-size:.82rem; margin-bottom:8px;}
 .modal-close{float:right; background:var(--panel); border:1px solid var(--panel-brd); color:var(--text); border-radius:99px; width:34px; height:34px; cursor:pointer;}
 
+/* medicine detail rows */
+.med-detail{margin-top:16px;}
+.med-row{display:grid; grid-template-columns:160px 1fr; gap:14px; padding:10px 0; border-top:1px solid var(--panel-brd); font-size:.9rem;}
+.med-row:first-child{border-top:none;}
+.med-row b{color:var(--muted); font-weight:600; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em;}
+.med-row span{color:var(--text);}
+
+/* ---------- scroll-reveal motion (AM Network motion standard) ----------
+ * transform + opacity only (GPU-accelerated), fast-in/slow-out easing,
+ * one signature moment (particle intro) + quiet disciplined reveals elsewhere,
+ * staggered children, reduced-motion fully respected (handled in JS + here). */
+.reveal{opacity:0; transform:translateY(28px); filter:blur(4px);
+  transition:opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1), filter .6s cubic-bezier(.22,1,.36,1);}
+.reveal.in-view{opacity:1; transform:none; filter:blur(0);}
+.stagger-item{opacity:0; transform:translateY(22px);
+  transition:opacity .5s cubic-bezier(.22,1,.36,1), transform .5s cubic-bezier(.22,1,.36,1);}
+.stagger-item.in-view{opacity:1; transform:none;}
+.card{transition:transform .18s cubic-bezier(.34,1.56,.64,1), border-color .18s ease, opacity .5s cubic-bezier(.22,1,.36,1), filter .5s ease;}
+@media (prefers-reduced-motion: reduce){
+  .reveal, .stagger-item{opacity:1 !important; transform:none !important; filter:none !important; transition:none !important;}
+}
 @media (max-width:960px){
   .grid.cols-4{grid-template-columns:repeat(2,1fr);}
   .grid.cols-3{grid-template-columns:repeat(2,1fr);}

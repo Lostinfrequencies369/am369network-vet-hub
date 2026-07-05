@@ -1,0 +1,24 @@
+{
+  "hero": {
+    "eyebrow": "Veterinary Digital Resource Network",
+    "title": "Tools and knowledge for better animal health decisions.",
+    "lead": "A premium hub for veterinary web apps, treatment references, species-wise resources and field notes — built and maintained by Dr. Ankit Malik.",
+    "ctaPrimaryText": "Explore web apps",
+    "ctaPrimaryHref": "#apps",
+    "ctaSecondaryText": "Read the blog",
+    "ctaSecondaryHref": "#blogs"
+  },
+  "sections": {
+    "apps": { "eyebrow": "Web Apps", "title": "Featured Google Web Apps" },
+    "directories": { "eyebrow": "Resources", "title": "Directories & Categories" },
+    "medicines": { "eyebrow": "Drug Reference", "title": "Medicines & Treatment Records" },
+    "blogs": { "eyebrow": "Blog", "title": "Latest Articles" }
+  },
+  "footer": {
+    "line1": "AM 369 Network — Veterinary Digital Resource Network",
+    "line2": "Designed by Dr. Ankit Malik"
+  },
+  "loader": {
+    "sub": "Designed by Dr. Ankit Malik"
+  }
+}

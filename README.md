@@ -28,9 +28,11 @@ assets/data/*.json    apps / blogs / directories / species / images / settings
 
 1. Open `admin.html`.
 2. Enter the passcode (default `AnkiMunky321` — change it in `assets/js/admin.js`, `DEMO_PASSCODE`).
-3. Add/edit/delete Web Apps, Blogs, Directories, Species.
-4. Every button shows a processing state and blocks double-clicks.
-5. Export a backup, or import one, or reset to sample data.
+3. **Site Content** — edit every heading, hero line, button label and footer string on the public site from one form.
+4. **Medicines** — full drug/treatment record CRUD: name, class, species, indications, dosage, route, contraindications, withdrawal period, notes.
+5. Add/edit/delete Web Apps, Blogs, Directories, Species.
+6. Every button shows a processing state and blocks double-clicks.
+7. Export a backup, or import one, or reset to sample data.
 
 > **Security:** The admin login is a client-side lock only — fine for local/demo use, not real protection. For production auth + shared saving, use the backend upgrade path below.
 

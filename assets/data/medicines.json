@@ -1,0 +1,47 @@
+[
+  {
+    "id": "med_001",
+    "name": "Oxytetracycline",
+    "genericName": "Oxytetracycline HCl",
+    "drugClass": "Antimicrobial — Tetracycline",
+    "species": ["Cattle", "Buffalo", "Goat", "Sheep"],
+    "indications": ["Respiratory infection", "Foot rot", "Wound infection"],
+    "dosage": "10–20 mg/kg IM or IV, repeat every 24–48h per formulation (LA vs short-acting)",
+    "route": "IM / IV",
+    "contraindications": "Avoid in severe hepatic or renal impairment; avoid in late pregnancy where possible",
+    "withdrawal": "Meat 28 days, Milk 96 hours (check label — LA formulations vary)",
+    "notes": "Long-acting formulations reduce injection frequency; rotate injection sites for large volumes.",
+    "status": "active",
+    "featured": true
+  },
+  {
+    "id": "med_002",
+    "name": "Meloxicam",
+    "genericName": "Meloxicam",
+    "drugClass": "NSAID",
+    "species": ["Cattle", "Buffalo", "Dog", "Cat"],
+    "indications": ["Fever", "Post-surgical pain", "Musculoskeletal pain", "Mastitis (adjunct)"],
+    "dosage": "Cattle: 0.5 mg/kg IV/SC single dose. Dog: 0.1–0.2 mg/kg SC/oral.",
+    "route": "IV / SC / Oral",
+    "contraindications": "Avoid in dehydrated or hypotensive animals; caution with concurrent nephrotoxic drugs; avoid in cats at cattle-label doses",
+    "withdrawal": "Meat 15 days, Milk 5 days (label-dependent)",
+    "notes": "Give with adequate hydration. Do not combine with other NSAIDs or corticosteroids.",
+    "status": "active",
+    "featured": true
+  },
+  {
+    "id": "med_003",
+    "name": "Ivermectin",
+    "genericName": "Ivermectin",
+    "drugClass": "Antiparasitic — Macrocyclic lactone",
+    "species": ["Cattle", "Buffalo", "Goat", "Sheep", "Pig"],
+    "indications": ["Gastrointestinal nematodes", "Lungworm", "Mange", "Lice"],
+    "dosage": "200 mcg/kg SC (injectable) or per pour-on label",
+    "route": "SC / Pour-on",
+    "contraindications": "Avoid in certain dog breeds with MDR1 mutation (Collies) at high doses; not for lactating dairy animals unless label permits",
+    "withdrawal": "Meat 35–49 days depending on formulation; not for use in lactating animals producing milk for human consumption unless labelled",
+    "notes": "Rotate anthelmintic classes to manage resistance; do not use in severely debilitated animals without assessment.",
+    "status": "active",
+    "featured": false
+  }
+]

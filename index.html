@@ -15,7 +15,7 @@
 <!-- START / LOADER — dust particles forming the brand name -->
 <div id="loader">
   <canvas id="particle-canvas" aria-hidden="true"></canvas>
-  <div class="loader-sub">Designed by Dr. Ankit Malik</div>
+  <div class="loader-sub" id="loader-sub">Designed by Dr. Ankit Malik</div>
   <div class="loader-bar"><i></i></div>
 </div>
 
@@ -41,13 +41,13 @@
 </header>
 
 <!-- HERO -->
-<section class="hero wrap">
-  <div class="eyebrow">Veterinary Digital Resource Network</div>
-  <h1>Tools and knowledge for better animal health decisions.</h1>
-  <p>A premium hub for veterinary web apps, treatment references, species-wise resources and field notes — built and maintained by Dr. Ankit Malik.</p>
+<section class="hero wrap reveal">
+  <div class="eyebrow" id="hero-eyebrow">Veterinary Digital Resource Network</div>
+  <h1 id="hero-title">Tools and knowledge for better animal health decisions.</h1>
+  <p id="hero-lead">A premium hub for veterinary web apps, treatment references, species-wise resources and field notes — built and maintained by Dr. Ankit Malik.</p>
   <div class="hero-actions">
-    <a class="btn btn-primary" href="#apps">Explore web apps</a>
-    <a class="btn btn-ghost" href="#blogs">Read the blog</a>
+    <a class="btn btn-primary" id="hero-cta-primary" href="#apps">Explore web apps</a>
+    <a class="btn btn-ghost" id="hero-cta-secondary" href="#blogs">Read the blog</a>
   </div>
 </section>
 
@@ -55,32 +55,42 @@
 
 <!-- WEB APPS -->
 <section class="block wrap" id="apps">
-  <div class="section-head">
-    <div><div class="eyebrow">Web Apps</div><h2>Featured Google Web Apps</h2></div>
+  <div class="section-head reveal">
+    <div><div class="eyebrow" id="apps-eyebrow">Web Apps</div><h2 id="apps-title">Featured Google Web Apps</h2></div>
   </div>
-  <div id="apps-grid" class="grid cols-4">
+  <div id="apps-grid" class="grid cols-4 stagger">
     <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
   </div>
 </section>
 
 <!-- DIRECTORIES -->
 <section class="block wrap" id="directories">
-  <div class="section-head">
-    <div><div class="eyebrow">Resources</div><h2>Directories &amp; Categories</h2></div>
+  <div class="section-head reveal">
+    <div><div class="eyebrow" id="directories-eyebrow">Resources</div><h2 id="directories-title">Directories &amp; Categories</h2></div>
   </div>
-  <div id="dir-grid" class="grid cols-3">
+  <div id="dir-grid" class="grid cols-3 stagger">
     <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
   </div>
 </section>
 
 <div class="wrap"><div id="ad-inline" class="ad-slot hidden" data-slot="homeInline">Ad space</div></div>
 
+<!-- MEDICINES / DRUG REFERENCE -->
+<section class="block wrap" id="medicines">
+  <div class="section-head reveal">
+    <div><div class="eyebrow" id="medicines-eyebrow">Drug Reference</div><h2 id="medicines-title">Medicines &amp; Treatment Records</h2></div>
+  </div>
+  <div id="medicines-grid" class="grid cols-3 stagger">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</section>
+
 <!-- BLOGS -->
 <section class="block wrap" id="blogs">
-  <div class="section-head">
-    <div><div class="eyebrow">Blog</div><h2>Latest Articles</h2></div>
+  <div class="section-head reveal">
+    <div><div class="eyebrow" id="blogs-eyebrow">Blog</div><h2 id="blogs-title">Latest Articles</h2></div>
   </div>
-  <div id="blogs-grid" class="grid cols-3">
+  <div id="blogs-grid" class="grid cols-3 stagger">
     <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
   </div>
 </section>
@@ -88,10 +98,20 @@
 <!-- FOOTER -->
 <footer class="site">
   <div class="wrap">
-    <span><b>AM 369 Network</b> — Veterinary Digital Resource Network</span>
-    <span>Designed by Dr. Ankit Malik · &copy; 2026</span>
+    <span id="footer-line1"><b>AM 369 Network</b> — Veterinary Digital Resource Network</span>
+    <span id="footer-line2">Designed by Dr. Ankit Malik · &copy; 2026</span>
   </div>
 </footer>
+
+<!-- MEDICINE DETAIL MODAL -->
+<div class="modal-overlay" id="med-modal">
+  <div class="modal">
+    <button class="modal-close" id="mm-close" aria-label="Close">✕</button>
+    <div class="meta" id="mm-meta"></div>
+    <h2 id="mm-title"></h2>
+    <div class="med-detail" id="mm-body"></div>
+  </div>
+</div>
 
 <!-- BLOG MODAL -->
 <div class="modal-overlay" id="blog-modal">

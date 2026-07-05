@@ -11,7 +11,7 @@
   // Demo gate only. Change this, but understand it is visible in source.
   var DEMO_PASSCODE = "AnkiMunky321";
 
-  var db = { apps: [], blogs: [], directories: [], species: [], images: [], settings: {} };
+  var db = { apps: [], blogs: [], directories: [], species: [], images: [], settings: {}, content: {}, medicines: [] };
   var speciesNames = [];
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -55,10 +55,12 @@
   function loadAll() {
     return Promise.all([
       DataService.get("apps"), DataService.get("blogs"), DataService.get("directories"),
-      DataService.get("species"), DataService.get("images"), DataService.get("settings")
+      DataService.get("species"), DataService.get("images"), DataService.get("settings"),
+      DataService.get("content"), DataService.get("medicines")
     ]).then(function (r) {
       db.apps = r[0] || []; db.blogs = r[1] || []; db.directories = r[2] || [];
       db.species = r[3] || []; db.images = r[4] || []; db.settings = r[5] || {};
+      db.content = r[6] || {}; db.medicines = r[7] || [];
       speciesNames = db.species.map(function (s) { return s.name; });
     });
   }
@@ -70,7 +72,7 @@
     var host = $("#stats"); if (!host) return;
     var items = [
       ["Web Apps", db.apps.length], ["Blogs", db.blogs.length],
-      ["Directories", db.directories.length], ["Species", db.species.length]
+      ["Medicines", db.medicines.length], ["Directories", db.directories.length]
     ];
     host.innerHTML = items.map(function (i) {
       return '<div class="stat"><div class="n">' + i[1] + '</div><div class="l">' + i[0] + '</div></div>';
@@ -121,6 +123,22 @@
     }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No blogs yet.</td></tr>';
   }
 
+  function renderMedicines(q) {
+    var body = $("#medicines-tbody"); if (!body) return;
+    var list = tableSearchFilter(db.medicines, q, ["name", "genericName", "drugClass", "species", "indications"]);
+    body.innerHTML = list.map(function (m) {
+      return '<tr>' +
+        '<td>' + esc(m.name) + (m.featured ? ' <span class="badge feat">Featured</span>' : '') + '</td>' +
+        '<td>' + esc(m.drugClass || "") + '</td>' +
+        '<td>' + (m.species || []).join(", ") + '</td>' +
+        '<td><span class="badge ' + (m.status === "active" ? "on" : "off") + '">' + esc(m.status || "") + '</span></td>' +
+        '<td class="row-actions">' +
+          '<button class="btn btn-ghost btn-sm" data-edit-med="' + m.id + '">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" data-del-med="' + m.id + '">Delete</button>' +
+        '</td></tr>';
+    }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No medicine records yet.</td></tr>';
+  }
+
   function renderDirs(q) {
     var body = $("#dirs-tbody"); if (!body) return;
     var list = tableSearchFilter(db.directories, q, ["title", "description"]);
@@ -149,7 +167,7 @@
   }
 
   function renderAllTables() {
-    renderStats(); renderApps(); renderBlogs(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm();
+    renderStats(); renderApps(); renderBlogs(); renderMedicines(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm(); renderContentForm();
   }
 
   /* ---------- modal engine ---------- */
@@ -296,6 +314,53 @@
     };
   }
 
+  /* ---------- MEDICINE form ---------- */
+  function medForm(m) {
+    m = m || {};
+    return '<h3>' + (m.id ? "Edit" : "Add") + ' Medicine Record</h3>' +
+      '<div class="form-row">' +
+        '<div class="field"><label>Name</label><input id="f-name" value="' + esc(m.name) + '"></div>' +
+        '<div class="field"><label>Generic name</label><input id="f-generic" value="' + esc(m.genericName) + '"></div>' +
+      '</div>' +
+      '<div class="field"><label>Drug class</label><input id="f-class" value="' + esc(m.drugClass) + '" placeholder="e.g. Antimicrobial — Tetracycline"></div>' +
+      '<div class="field"><label>Species</label>' + speciesChips(m.species) + '</div>' +
+      '<div class="field"><label>Indications (comma separated)</label><input id="f-ind" value="' + esc((m.indications || []).join(", ")) + '"></div>' +
+      '<div class="form-row">' +
+        '<div class="field"><label>Dosage</label><textarea id="f-dosage">' + esc(m.dosage) + '</textarea></div>' +
+        '<div class="field"><label>Route</label><input id="f-route" value="' + esc(m.route) + '" placeholder="e.g. IM / IV / Oral"></div>' +
+      '</div>' +
+      '<div class="field"><label>Contraindications</label><textarea id="f-contra">' + esc(m.contraindications) + '</textarea></div>' +
+      '<div class="field"><label>Withdrawal period</label><input id="f-withdrawal" value="' + esc(m.withdrawal) + '"></div>' +
+      '<div class="field"><label>Notes</label><textarea id="f-notes">' + esc(m.notes) + '</textarea></div>' +
+      '<div class="form-row">' +
+        '<div class="field"><label>Status</label><select id="f-status"><option value="active"' + (m.status !== "inactive" ? " selected" : "") + '>Active</option><option value="inactive"' + (m.status === "inactive" ? " selected" : "") + '>Inactive</option></select></div>' +
+        '<div class="field"><label>Featured</label><select id="f-feat"><option value="no"' + (!m.featured ? " selected" : "") + '>No</option><option value="yes"' + (m.featured ? " selected" : "") + '>Yes</option></select></div>' +
+      '</div>' +
+      '<div class="modal-foot"><button class="btn btn-ghost" id="m-cancel">Cancel</button><button class="btn btn-primary" id="m-save">Save</button></div>';
+  }
+  function editMed(id) {
+    var m = db.medicines.find(function (x) { return x.id === id; });
+    openModal(medForm(m)); wireChips();
+    $("#m-cancel").onclick = closeModal;
+    $("#m-save").onclick = function () {
+      var btn = this;
+      withBusy(btn, "Saving…", function () {
+        var obj = {
+          id: id || uid("med"), name: $("#f-name").value.trim(), genericName: $("#f-generic").value.trim(),
+          drugClass: $("#f-class").value.trim(), species: readChips(),
+          indications: $("#f-ind").value.split(",").map(function (t) { return t.trim(); }).filter(Boolean),
+          dosage: $("#f-dosage").value.trim(), route: $("#f-route").value.trim(),
+          contraindications: $("#f-contra").value.trim(), withdrawal: $("#f-withdrawal").value.trim(),
+          notes: $("#f-notes").value.trim(), status: $("#f-status").value, featured: $("#f-feat").value === "yes"
+        };
+        if (!obj.name) { toast("Name required.", "err"); return; }
+        if (id) { var i = db.medicines.findIndex(function (x) { return x.id === id; }); db.medicines[i] = obj; }
+        else db.medicines.push(obj);
+        save("medicines"); renderMedicines($("#medicines-search").value); renderStats(); closeModal(); toast("Medicine record saved.", "ok");
+      });
+    };
+  }
+
   /* ---------- SPECIES form ---------- */
   function spForm(s) {
     s = s || {};
@@ -384,6 +449,54 @@
       '</div></div>';
   }
 
+  /* ---------- site content editor (every editable public string) ---------- */
+  function renderContentForm() {
+    var host = $("#content-form"); if (!host) return;
+    var c = db.content || {};
+    var hero = c.hero || {}, sec = c.sections || {}, footer = c.footer || {}, loader = c.loader || {};
+    function field(id, label, val, isArea) {
+      return '<div class="field"><label>' + label + '</label>' +
+        (isArea ? '<textarea id="' + id + '">' + esc(val) + '</textarea>' : '<input id="' + id + '" value="' + esc(val) + '">') + '</div>';
+    }
+    host.innerHTML =
+      '<h4 style="margin:0 0 10px;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Hero</h4>' +
+      field("c-hero-eyebrow", "Eyebrow", hero.eyebrow) +
+      field("c-hero-title", "Headline", hero.title, true) +
+      field("c-hero-lead", "Lead paragraph", hero.lead, true) +
+      '<div class="form-row">' + field("c-hero-cta1-text", "Primary button text", hero.ctaPrimaryText) + field("c-hero-cta1-href", "Primary button link", hero.ctaPrimaryHref) + '</div>' +
+      '<div class="form-row">' + field("c-hero-cta2-text", "Secondary button text", hero.ctaSecondaryText) + field("c-hero-cta2-href", "Secondary button link", hero.ctaSecondaryHref) + '</div>' +
+      '<h4 style="margin:22px 0 10px;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Section headings</h4>' +
+      ["apps", "directories", "medicines", "blogs"].map(function (key) {
+        var s = sec[key] || {};
+        return '<div class="form-row">' + field("c-sec-" + key + "-eyebrow", key.charAt(0).toUpperCase() + key.slice(1) + " — eyebrow", s.eyebrow) + field("c-sec-" + key + "-title", key.charAt(0).toUpperCase() + key.slice(1) + " — title", s.title) + '</div>';
+      }).join('') +
+      '<h4 style="margin:22px 0 10px;font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Footer &amp; loader</h4>' +
+      field("c-footer-1", "Footer line 1", footer.line1) +
+      field("c-footer-2", "Footer line 2", footer.line2) +
+      field("c-loader-sub", "Start-screen subtitle", loader.sub) +
+      '<div class="modal-foot"><button class="btn btn-primary" id="content-save">Save site content</button></div>';
+
+    $("#content-save").onclick = function () {
+      var btn = this;
+      withBusy(btn, "Saving…", function () {
+        var newContent = {
+          hero: {
+            eyebrow: $("#c-hero-eyebrow").value.trim(), title: $("#c-hero-title").value.trim(), lead: $("#c-hero-lead").value.trim(),
+            ctaPrimaryText: $("#c-hero-cta1-text").value.trim(), ctaPrimaryHref: $("#c-hero-cta1-href").value.trim(),
+            ctaSecondaryText: $("#c-hero-cta2-text").value.trim(), ctaSecondaryHref: $("#c-hero-cta2-href").value.trim()
+          },
+          sections: {},
+          footer: { line1: $("#c-footer-1").value.trim(), line2: $("#c-footer-2").value.trim() },
+          loader: { sub: $("#c-loader-sub").value.trim() }
+        };
+        ["apps", "directories", "medicines", "blogs"].forEach(function (key) {
+          newContent.sections[key] = { eyebrow: $("#c-sec-" + key + "-eyebrow").value.trim(), title: $("#c-sec-" + key + "-title").value.trim() };
+        });
+        db.content = newContent; save("content"); toast("Site content saved.", "ok");
+      });
+    };
+  }
+
   /* ---------- drive settings ---------- */
   function renderDriveForm() {
     var host = $("#drive-form"); if (!host) return;
@@ -462,7 +575,7 @@
   function switchView(name) {
     $$(".view").forEach(function (v) { v.classList.toggle("active", v.id === "view-" + name); });
     $$(".sb-nav a").forEach(function (a) { a.classList.toggle("active", a.dataset.view === name); });
-    $("#topbar-title").textContent = ({ dashboard: "Dashboard", apps: "Web Apps", blogs: "Blogs & Articles", directories: "Directories", species: "Species", settings: "Settings & Backup" })[name] || "Dashboard";
+    $("#topbar-title").textContent = ({ dashboard: "Dashboard", content: "Site Content", apps: "Web Apps", medicines: "Medicines & Drug Records", blogs: "Blogs & Articles", directories: "Directories", species: "Species", settings: "Settings & Backup" })[name] || "Dashboard";
     $("#sidebar").classList.remove("open");
   }
 
@@ -471,6 +584,8 @@
     document.addEventListener("click", function (e) {
       var t = e.target.closest("[data-edit-app]"); if (t) return editApp(t.dataset.editApp);
       t = e.target.closest("[data-del-app]"); if (t) { var id = t.dataset.delApp; var a = db.apps.find(function (x){return x.id===id;}); return confirmDelete(a ? a.title : "app", function () { db.apps = db.apps.filter(function (x){return x.id!==id;}); save("apps"); renderApps($("#apps-search").value); renderStats(); toast("Deleted.", "ok"); }); }
+      t = e.target.closest("[data-edit-med]"); if (t) return editMed(t.dataset.editMed);
+      t = e.target.closest("[data-del-med]"); if (t) { var mid = t.dataset.delMed; var mm = db.medicines.find(function(x){return x.id===mid;}); return confirmDelete(mm?mm.name:"medicine", function(){ db.medicines = db.medicines.filter(function(x){return x.id!==mid;}); save("medicines"); renderMedicines($("#medicines-search").value); renderStats(); toast("Deleted.","ok"); }); }
       t = e.target.closest("[data-edit-blog]"); if (t) return editBlog(t.dataset.editBlog);
       t = e.target.closest("[data-del-blog]"); if (t) { var bid = t.dataset.delBlog; var b = db.blogs.find(function(x){return x.id===bid;}); return confirmDelete(b?b.title:"blog", function(){ db.blogs = db.blogs.filter(function(x){return x.id!==bid;}); save("blogs"); renderBlogs($("#blogs-search").value); renderStats(); toast("Deleted.","ok"); }); }
       t = e.target.closest("[data-edit-dir]"); if (t) return editDir(t.dataset.editDir);
@@ -488,11 +603,13 @@
       $$(".sb-nav a").forEach(function (a) { a.addEventListener("click", function () { switchView(a.dataset.view); }); });
       // add buttons
       $("#add-app").onclick = function () { editApp(null); };
+      $("#add-medicine").onclick = function () { editMed(null); };
       $("#add-blog").onclick = function () { editBlog(null); };
       $("#add-dir").onclick = function () { editDir(null); };
       $("#add-sp").onclick = function () { editSp(null); };
       // searches
       $("#apps-search").oninput = function () { renderApps(this.value); };
+      $("#medicines-search").oninput = function () { renderMedicines(this.value); };
       $("#blogs-search").oninput = function () { renderBlogs(this.value); };
       $("#dirs-search").oninput = function () { renderDirs(this.value); };
       $("#species-search").oninput = function () { renderSpecies(this.value); };

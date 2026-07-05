@@ -22,7 +22,7 @@
 
   var NS = "am369:v1:";          // LocalStorage namespace (bump to invalidate)
   var CACHE_TTL = 5 * 60 * 1000; // in-memory cache 5 min
-  var KEYS = ["apps", "blogs", "directories", "species", "images", "settings"];
+  var KEYS = ["apps", "blogs", "directories", "species", "images", "settings", "content", "medicines"];
   var SEED_PATH = "assets/data/";
 
   var mem = {};   // { key: { data, ts } }
