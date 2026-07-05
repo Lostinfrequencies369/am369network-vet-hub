@@ -7,6 +7,20 @@
   "schemaVersion": 1,
   "driveUploadUrl": "",
   "driveAdminKey": "AnkiMunky321",
+  "auth": {
+    "requireEntry": true,
+    "googleEnabled": false,
+    "googleClientId": "",
+    "guestEnabled": true
+  },
+  "subscription": {
+    "enabled": false,
+    "provider": "none",
+    "planName": "AM 369 Pro",
+    "priceLabel": "",
+    "checkoutUrl": "",
+    "gatedSections": []
+  },
   "ads": {
     "enabled": false,
     "provider": "none",

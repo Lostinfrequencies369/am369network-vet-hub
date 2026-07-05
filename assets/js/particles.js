@@ -61,7 +61,7 @@
       targets = targets.filter(function (_, i) { return i % step === 0; });
     }
 
-    var accentColors = ["#1FA9B0", "#3B6FD1", "#8A5FD1"];
+    var accentColors = ["#38BDF8", "#5AA9FF", "#7C5CFF"];
     var particles = targets.map(function (t, i) {
       var angle = Math.random() * Math.PI * 2;
       var dist = 260 + Math.random() * 340;
@@ -71,7 +71,7 @@
         tx: t.x, ty: t.y,
         vx: 0, vy: 0,
         size: Math.random() * 1.6 + 0.6,
-        color: i % 9 === 0 ? accentColors[i % 3] : "#2A2C26",
+        color: i % 6 === 0 ? accentColors[i % 3] : "#CFE3FF",
         settle: 0.028 + Math.random() * 0.02
       };
     });

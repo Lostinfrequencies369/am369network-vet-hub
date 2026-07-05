@@ -11,7 +11,7 @@
   // Demo gate only. Change this, but understand it is visible in source.
   var DEMO_PASSCODE = "AnkiMunky321";
 
-  var db = { apps: [], blogs: [], directories: [], species: [], images: [], settings: {}, content: {}, medicines: [] };
+  var db = { apps: [], blogs: [], directories: [], species: [], images: [], settings: {}, content: {}, medicines: [], systems: [] };
   var speciesNames = [];
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -56,11 +56,11 @@
     return Promise.all([
       DataService.get("apps"), DataService.get("blogs"), DataService.get("directories"),
       DataService.get("species"), DataService.get("images"), DataService.get("settings"),
-      DataService.get("content"), DataService.get("medicines")
+      DataService.get("content"), DataService.get("medicines"), DataService.get("systems")
     ]).then(function (r) {
       db.apps = r[0] || []; db.blogs = r[1] || []; db.directories = r[2] || [];
       db.species = r[3] || []; db.images = r[4] || []; db.settings = r[5] || {};
-      db.content = r[6] || {}; db.medicines = r[7] || [];
+      db.content = r[6] || {}; db.medicines = r[7] || []; db.systems = r[8] || [];
       speciesNames = db.species.map(function (s) { return s.name; });
     });
   }
@@ -139,6 +139,21 @@
     }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No medicine records yet.</td></tr>';
   }
 
+  function renderSystems(q) {
+    var body = $("#systems-tbody"); if (!body) return;
+    var list = tableSearchFilter(db.systems, q, ["name"]);
+    body.innerHTML = list.map(function (s) {
+      return '<tr>' +
+        '<td>' + esc(s.name) + '</td>' +
+        '<td>' + esc(s.icon || "") + '</td>' +
+        '<td>' + (s.count != null ? esc(s.count) : "") + '</td>' +
+        '<td class="row-actions">' +
+          '<button class="btn btn-ghost btn-sm" data-edit-sys="' + s.id + '">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" data-del-sys="' + s.id + '">Delete</button>' +
+        '</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="color:var(--muted)">No systems yet.</td></tr>';
+  }
+
   function renderDirs(q) {
     var body = $("#dirs-tbody"); if (!body) return;
     var list = tableSearchFilter(db.directories, q, ["title", "description"]);
@@ -167,7 +182,7 @@
   }
 
   function renderAllTables() {
-    renderStats(); renderApps(); renderBlogs(); renderMedicines(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm(); renderContentForm();
+    renderStats(); renderApps(); renderBlogs(); renderMedicines(); renderSystems(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm(); renderContentForm(); renderAuthForm(); renderSubForm();
   }
 
   /* ---------- modal engine ---------- */
@@ -497,6 +512,86 @@
     };
   }
 
+  /* ---------- SYSTEM form ---------- */
+  function sysForm(s) {
+    s = s || {};
+    return '<h3>' + (s.id ? "Edit" : "Add") + ' Body System</h3>' +
+      '<div class="field"><label>Name</label><input id="f-name" value="' + esc(s.name) + '"></div>' +
+      '<div class="form-row">' +
+        '<div class="field"><label>Icon (emoji)</label><input id="f-icon" value="' + esc(s.icon) + '" placeholder="🫁"></div>' +
+        '<div class="field"><label>Drug count</label><input id="f-count" type="number" value="' + esc(s.count != null ? s.count : "") + '"></div>' +
+      '</div>' +
+      thumbField("f-image", s.image, "Image URL (optional, overrides emoji)") +
+      '<div class="modal-foot"><button class="btn btn-ghost" id="m-cancel">Cancel</button><button class="btn btn-primary" id="m-save">Save</button></div>';
+  }
+  function editSys(id) {
+    var s = db.systems.find(function (x) { return x.id === id; });
+    openModal(sysForm(s));
+    wireDriveUpload("f-image", "Systems", function () { return $("#f-name") ? $("#f-name").value : ""; });
+    $("#m-cancel").onclick = closeModal;
+    $("#m-save").onclick = function () {
+      var btn = this;
+      withBusy(btn, "Saving…", function () {
+        var cnt = $("#f-count").value.trim();
+        var obj = { id: id || uid("sys"), name: $("#f-name").value.trim(), icon: $("#f-icon").value.trim(), count: cnt === "" ? null : Number(cnt), image: $("#f-image").value.trim() };
+        if (!obj.name) { toast("Name required.", "err"); return; }
+        if (id) { var i = db.systems.findIndex(function (x) { return x.id === id; }); db.systems[i] = obj; }
+        else db.systems.push(obj);
+        save("systems"); renderSystems($("#systems-search").value); closeModal(); toast("System saved.", "ok");
+      });
+    };
+  }
+
+  /* ---------- access / auth settings ---------- */
+  function renderAuthForm() {
+    var host = $("#auth-form"); if (!host) return;
+    var a = db.settings.auth || {};
+    host.innerHTML =
+      '<div class="field"><label>Show start screen (entry gate)</label><select id="au-entry"><option value="yes"' + (a.requireEntry !== false ? " selected" : "") + '>Yes</option><option value="no"' + (a.requireEntry === false ? " selected" : "") + '>No</option></select></div>' +
+      '<div class="field"><label>Allow "Continue as Guest"</label><select id="au-guest"><option value="yes"' + (a.guestEnabled !== false ? " selected" : "") + '>Yes</option><option value="no"' + (a.guestEnabled === false ? " selected" : "") + '>No</option></select></div>' +
+      '<div class="field"><label>Enable Google sign-in</label><select id="au-google"><option value="no"' + (!a.googleEnabled ? " selected" : "") + '>No</option><option value="yes"' + (a.googleEnabled ? " selected" : "") + '>Yes</option></select></div>' +
+      '<div class="field"><label>Google OAuth Client ID</label><input id="au-clientid" value="' + esc(a.googleClientId || "") + '" placeholder="xxxxxxxx.apps.googleusercontent.com"><div class="hint">Create at console.cloud.google.com → Credentials → OAuth client (Web). Add your site domain as an authorized JavaScript origin.</div></div>' +
+      '<div class="modal-foot"><button class="btn btn-primary" id="au-save">Save access settings</button></div>';
+    $("#au-save").onclick = function () {
+      var btn = this;
+      withBusy(btn, "Saving…", function () {
+        db.settings.auth = {
+          requireEntry: $("#au-entry").value === "yes",
+          guestEnabled: $("#au-guest").value === "yes",
+          googleEnabled: $("#au-google").value === "yes",
+          googleClientId: $("#au-clientid").value.trim()
+        };
+        save("settings"); toast("Access settings saved.", "ok");
+      });
+    };
+  }
+
+  /* ---------- subscription settings ---------- */
+  function renderSubForm() {
+    var host = $("#sub-form"); if (!host) return;
+    var s = db.settings.subscription || {};
+    host.innerHTML =
+      '<div class="field"><label>Enable subscription features</label><select id="sb-en"><option value="no"' + (!s.enabled ? " selected" : "") + '>Disabled</option><option value="yes"' + (s.enabled ? " selected" : "") + '>Enabled</option></select><div class="hint">Scaffold only — turn on once a payment provider is connected. Real charging needs a backend (Stripe/Razorpay/Apps Script).</div></div>' +
+      '<div class="form-row">' +
+        '<div class="field"><label>Plan name</label><input id="sb-plan" value="' + esc(s.planName || "") + '"></div>' +
+        '<div class="field"><label>Price label</label><input id="sb-price" value="' + esc(s.priceLabel || "") + '" placeholder="₹199 / month"></div>' +
+      '</div>' +
+      '<div class="field"><label>Checkout URL</label><input id="sb-url" value="' + esc(s.checkoutUrl || "") + '" placeholder="https://…"></div>' +
+      '<div class="modal-foot"><button class="btn btn-primary" id="sb-save">Save subscription settings</button></div>';
+    $("#sb-save").onclick = function () {
+      var btn = this;
+      withBusy(btn, "Saving…", function () {
+        db.settings.subscription = {
+          enabled: $("#sb-en").value === "yes",
+          provider: (db.settings.subscription && db.settings.subscription.provider) || "custom",
+          planName: $("#sb-plan").value.trim(), priceLabel: $("#sb-price").value.trim(),
+          checkoutUrl: $("#sb-url").value.trim(), gatedSections: (db.settings.subscription && db.settings.subscription.gatedSections) || []
+        };
+        save("settings"); toast("Subscription settings saved.", "ok");
+      });
+    };
+  }
+
   /* ---------- drive settings ---------- */
   function renderDriveForm() {
     var host = $("#drive-form"); if (!host) return;
@@ -575,7 +670,7 @@
   function switchView(name) {
     $$(".view").forEach(function (v) { v.classList.toggle("active", v.id === "view-" + name); });
     $$(".sb-nav a").forEach(function (a) { a.classList.toggle("active", a.dataset.view === name); });
-    $("#topbar-title").textContent = ({ dashboard: "Dashboard", content: "Site Content", apps: "Web Apps", medicines: "Medicines & Drug Records", blogs: "Blogs & Articles", directories: "Directories", species: "Species", settings: "Settings & Backup" })[name] || "Dashboard";
+    $("#topbar-title").textContent = ({ dashboard: "Dashboard", content: "Site Content", apps: "Web Apps", systems: "Body Systems", medicines: "Medicines & Drug Records", blogs: "Blogs & Articles", directories: "Directories", species: "Species", settings: "Settings & Backup" })[name] || "Dashboard";
     $("#sidebar").classList.remove("open");
   }
 
@@ -586,6 +681,8 @@
       t = e.target.closest("[data-del-app]"); if (t) { var id = t.dataset.delApp; var a = db.apps.find(function (x){return x.id===id;}); return confirmDelete(a ? a.title : "app", function () { db.apps = db.apps.filter(function (x){return x.id!==id;}); save("apps"); renderApps($("#apps-search").value); renderStats(); toast("Deleted.", "ok"); }); }
       t = e.target.closest("[data-edit-med]"); if (t) return editMed(t.dataset.editMed);
       t = e.target.closest("[data-del-med]"); if (t) { var mid = t.dataset.delMed; var mm = db.medicines.find(function(x){return x.id===mid;}); return confirmDelete(mm?mm.name:"medicine", function(){ db.medicines = db.medicines.filter(function(x){return x.id!==mid;}); save("medicines"); renderMedicines($("#medicines-search").value); renderStats(); toast("Deleted.","ok"); }); }
+      t = e.target.closest("[data-edit-sys]"); if (t) return editSys(t.dataset.editSys);
+      t = e.target.closest("[data-del-sys]"); if (t) { var sysid = t.dataset.delSys; var sy = db.systems.find(function(x){return x.id===sysid;}); return confirmDelete(sy?sy.name:"system", function(){ db.systems = db.systems.filter(function(x){return x.id!==sysid;}); save("systems"); renderSystems($("#systems-search").value); toast("Deleted.","ok"); }); }
       t = e.target.closest("[data-edit-blog]"); if (t) return editBlog(t.dataset.editBlog);
       t = e.target.closest("[data-del-blog]"); if (t) { var bid = t.dataset.delBlog; var b = db.blogs.find(function(x){return x.id===bid;}); return confirmDelete(b?b.title:"blog", function(){ db.blogs = db.blogs.filter(function(x){return x.id!==bid;}); save("blogs"); renderBlogs($("#blogs-search").value); renderStats(); toast("Deleted.","ok"); }); }
       t = e.target.closest("[data-edit-dir]"); if (t) return editDir(t.dataset.editDir);
@@ -604,12 +701,14 @@
       // add buttons
       $("#add-app").onclick = function () { editApp(null); };
       $("#add-medicine").onclick = function () { editMed(null); };
+      $("#add-system").onclick = function () { editSys(null); };
       $("#add-blog").onclick = function () { editBlog(null); };
       $("#add-dir").onclick = function () { editDir(null); };
       $("#add-sp").onclick = function () { editSp(null); };
       // searches
       $("#apps-search").oninput = function () { renderApps(this.value); };
       $("#medicines-search").oninput = function () { renderMedicines(this.value); };
+      $("#systems-search").oninput = function () { renderSystems(this.value); };
       $("#blogs-search").oninput = function () { renderBlogs(this.value); };
       $("#dirs-search").oninput = function () { renderDirs(this.value); };
       $("#species-search").oninput = function () { renderSpecies(this.value); };

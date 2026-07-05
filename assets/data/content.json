@@ -9,8 +9,9 @@
     "ctaSecondaryHref": "#blogs"
   },
   "sections": {
+    "systems": { "eyebrow": "Reference", "title": "Browse by Body System" },
     "apps": { "eyebrow": "Web Apps", "title": "Featured Google Web Apps" },
-    "directories": { "eyebrow": "Resources", "title": "Directories & Categories" },
+    "directories": { "eyebrow": "Resources", "title": "Directories & Tools" },
     "medicines": { "eyebrow": "Drug Reference", "title": "Medicines & Treatment Records" },
     "blogs": { "eyebrow": "Blog", "title": "Latest Articles" }
   },

@@ -26,13 +26,29 @@ assets/data/*.json    apps / blogs / directories / species / images / settings
 
 ## Using the admin panel
 
-1. Open `admin.html`.
+1. Open `admin.html` (separate URL — no link to it from the public site, so viewers can't reach it by browsing).
 2. Enter the passcode (default `AnkiMunky321` — change it in `assets/js/admin.js`, `DEMO_PASSCODE`).
-3. **Site Content** — edit every heading, hero line, button label and footer string on the public site from one form.
-4. **Medicines** — full drug/treatment record CRUD: name, class, species, indications, dosage, route, contraindications, withdrawal period, notes.
-5. Add/edit/delete Web Apps, Blogs, Directories, Species.
-6. Every button shows a processing state and blocks double-clicks.
-7. Export a backup, or import one, or reset to sample data.
+3. **Site Content** — edit every heading, hero line, button label and footer string.
+4. **Web Apps** — add Google Web App links (these also appear in the public side drawer).
+5. **Body Systems** — manage the "Browse by System" cards (name, emoji or image, drug count).
+6. **Medicines** — full drug/treatment record CRUD.
+7. Add/edit/delete Blogs, Directories, Species.
+8. **Settings → Access & Sign-in** — toggle the start screen, guest access, and Google sign-in (paste your OAuth client ID).
+9. **Settings → Subscription** — scaffold for future paid plans (plan name, price label, checkout URL).
+10. Every button shows a processing state and blocks double-clicks. Export/import backups or reset to sample data.
+
+## Start screen, guest access and Google sign-in
+
+The public site opens with a start screen offering **Continue as Guest** (works immediately) and **Sign in with Google** (appears once enabled). To enable Google sign-in:
+1. At console.cloud.google.com → APIs & Services → Credentials, create an **OAuth client ID (Web application)**.
+2. Add your site's domain (e.g. `https://am369network.in`) as an **Authorized JavaScript origin**.
+3. In admin → Settings → Access & Sign-in, enable Google and paste the client ID.
+
+Sign-in state is stored per browser; guests can browse everything. This is a client-side identity layer — for member-only content or real gating you'll add a backend later.
+
+## Future payments / subscriptions
+
+The subscription block in settings is scaffolding: it holds plan name, price and checkout URL, and marks which sections are member-only. Actual charging needs a payment provider (Stripe, Razorpay, or an Apps Script bridge) plus a backend to verify entitlements — the data model is already in place for that upgrade.
 
 > **Security:** The admin login is a client-side lock only — fine for local/demo use, not real protection. For production auth + shared saving, use the backend upgrade path below.
 

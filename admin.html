@@ -33,6 +33,7 @@
       <a data-view="dashboard" class="active">📊 Dashboard</a>
       <a data-view="content">✏️ Site Content</a>
       <a data-view="apps">🧩 Web Apps</a>
+      <a data-view="systems">🫀 Body Systems</a>
       <a data-view="medicines">💊 Medicines</a>
       <a data-view="blogs">📝 Blogs</a>
       <a data-view="directories">📁 Directories</a>
@@ -84,6 +85,20 @@
             </div>
           </div>
           <table><thead><tr><th>Name</th><th>Class</th><th>Species</th><th>Status</th><th>Actions</th></tr></thead><tbody id="medicines-tbody"></tbody></table>
+        </div>
+      </section>
+
+      <!-- BODY SYSTEMS -->
+      <section id="view-systems" class="view">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Body Systems (Browse-by-System cards)</h3>
+            <div style="display:flex;gap:10px">
+              <input class="table-search" id="systems-search" placeholder="Search systems…">
+              <button class="btn btn-primary btn-sm" id="add-system">+ Add System</button>
+            </div>
+          </div>
+          <table><thead><tr><th>Name</th><th>Icon</th><th>Count</th><th>Actions</th></tr></thead><tbody id="systems-tbody"></tbody></table>
         </div>
       </section>
 
@@ -145,6 +160,14 @@
 
       <!-- SETTINGS -->
       <section id="view-settings" class="view">
+        <div class="panel">
+          <div class="panel-head"><h3>Access &amp; Sign-in</h3></div>
+          <div id="auth-form"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Subscription (future payments)</h3></div>
+          <div id="sub-form"></div>
+        </div>
         <div class="panel">
           <div class="panel-head"><h3>Google Drive Upload</h3></div>
           <div id="drive-form"></div>

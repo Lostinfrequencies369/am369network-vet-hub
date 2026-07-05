@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var state = { apps: [], blogs: [], directories: [], medicines: [], species: [], settings: {}, content: {}, filterSpecies: "All", query: "" };
+  var state = { apps: [], blogs: [], directories: [], medicines: [], systems: [], species: [], settings: {}, content: {}, filterSpecies: "All", query: "" };
 
   function $(s, r) { return (r || document).querySelector(s); }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
@@ -132,6 +132,57 @@
     reveal(host);
   }
 
+  function renderSystems() {
+    var host = $("#systems-grid"); if (!host) return;
+    var list = state.systems.filter(function (s) { return matchQuery(s, ["name"]); });
+    host.innerHTML = "";
+    if (!list.length) { host.appendChild(el("div", "empty", "No systems match your search.")); return; }
+    list.forEach(function (s) {
+      var c = el("div", "sys-card");
+      var icon = s.image ? '<img data-src="' + esc(s.image) + '" alt="">' : esc(s.icon || "🩺");
+      c.innerHTML =
+        '<div class="sys-ic">' + icon + '</div>' +
+        '<h4>' + esc(s.name) + '</h4>' +
+        '<div class="count">' + (s.count != null ? esc(s.count) + " drugs" : "") + '</div>';
+      c.addEventListener("click", function () {
+        state.query = s.name; var search = $("#global-search"); if (search) search.value = "";
+        var target = $("#medicines"); if (target) target.scrollIntoView({ behavior: "smooth" });
+      });
+      host.appendChild(c);
+    });
+    hydrateImages(host);
+    reveal(host);
+  }
+
+  /* ---------- drawer ---------- */
+  function buildDrawer() {
+    // species chips inside drawer
+    var spHost = $("#drawer-species");
+    if (spHost) {
+      spHost.innerHTML = state.species.map(function (s) {
+        return '<button class="drawer-chip" data-sp="' + esc(s.name) + '">' + esc(s.name) + '</button>';
+      }).join('');
+      Array.prototype.forEach.call(spHost.querySelectorAll(".drawer-chip"), function (chip) {
+        chip.addEventListener("click", function () {
+          state.filterSpecies = chip.getAttribute("data-sp");
+          var sel = $("#species-select"); if (sel) sel.value = state.filterSpecies;
+          renderAll(); closeDrawer();
+          var t = $("#medicines"); if (t) t.scrollIntoView({ behavior: "smooth" });
+        });
+      });
+    }
+    // web apps inside drawer
+    var appHost = $("#drawer-apps");
+    if (appHost) {
+      var active = state.apps.filter(function (a) { return a.status === "active"; });
+      appHost.innerHTML = active.length ? active.map(function (a) {
+        return '<a class="drawer-link" href="' + esc(a.url || "#") + '" target="_blank" rel="noopener"><span class="ic">🧩</span>' + esc(a.title) + '</a>';
+      }).join('') : '<div style="color:var(--muted);font-size:.8rem;padding:8px 14px">No web apps yet.</div>';
+    }
+  }
+  function openDrawer() { $("#drawer").classList.add("open"); $("#drawer-scrim").classList.add("open"); document.body.style.overflow = "hidden"; }
+  function closeDrawer() { $("#drawer").classList.remove("open"); $("#drawer-scrim").classList.remove("open"); document.body.style.overflow = ""; }
+
   function renderSpeciesOptions() {
     var sel = $("#species-select"); if (!sel) return;
     var opts = ['<option value="All">All Species</option>'];
@@ -208,7 +259,7 @@
     var p2 = $("#hero-cta-secondary"); if (p2) { if (hero.ctaSecondaryText) p2.textContent = hero.ctaSecondaryText; if (hero.ctaSecondaryHref) p2.href = hero.ctaSecondaryHref; }
 
     var sec = c.sections || {};
-    ["apps", "directories", "medicines", "blogs"].forEach(function (key) {
+    ["apps", "directories", "medicines", "blogs", "systems"].forEach(function (key) {
       var s = sec[key]; if (!s) return;
       setText(key + "-eyebrow", s.eyebrow); setText(key + "-title", s.title);
     });
@@ -248,19 +299,21 @@
   }
 
   function renderAll() {
-    renderApps(); renderBlogs(); renderDirectories(); renderMedicines();
+    renderSystems(); renderApps(); renderBlogs(); renderDirectories(); renderMedicines();
   }
 
   /* ---------- load ---------- */
   function load() {
     return Promise.all([
       DataService.get("settings"), DataService.get("species"), DataService.get("content"),
-      DataService.get("apps"), DataService.get("blogs"), DataService.get("directories"), DataService.get("medicines")
+      DataService.get("apps"), DataService.get("blogs"), DataService.get("directories"),
+      DataService.get("medicines"), DataService.get("systems")
     ]).then(function (r) {
       state.settings = r[0] || {}; state.species = r[1] || []; state.content = r[2] || {};
-      state.apps = r[3] || []; state.blogs = r[4] || []; state.directories = r[5] || []; state.medicines = r[6] || [];
-      applySettings(); applyContent(); renderSpeciesOptions(); renderAll(); applyAllAdSlots();
-      reveal(document); // hero + section heads
+      state.apps = r[3] || []; state.blogs = r[4] || []; state.directories = r[5] || [];
+      state.medicines = r[6] || []; state.systems = r[7] || [];
+      applySettings(); applyContent(); renderSpeciesOptions(); buildDrawer(); renderAll(); applyAllAdSlots();
+      reveal(document);
     }).catch(function (e) {
       console.error(e); toast("Could not load data. Refresh to retry.", "err");
     });
@@ -268,15 +321,25 @@
 
   /* ---------- events ---------- */
   function wire() {
-    var sel = $("#species-select");
-    if (sel) sel.addEventListener("change", function () { state.filterSpecies = this.value; renderAll(); });
     var search = $("#global-search");
     if (search) search.addEventListener("input", debounce(function () { state.query = search.value.trim(); renderAll(); }, 180));
     var close = $("#bm-close"); if (close) close.addEventListener("click", closeBlog);
     var ov = $("#blog-modal"); if (ov) ov.addEventListener("click", function (e) { if (e.target === ov) closeBlog(); });
     var mclose = $("#mm-close"); if (mclose) mclose.addEventListener("click", closeMedicine);
     var mov = $("#med-modal"); if (mov) mov.addEventListener("click", function (e) { if (e.target === mov) closeMedicine(); });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeBlog(); closeMedicine(); } });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") { closeBlog(); closeMedicine(); closeDrawer(); } });
+
+    // drawer
+    var mt = $("#menu-toggle"); if (mt) mt.addEventListener("click", openDrawer);
+    var dc = $("#drawer-close"); if (dc) dc.addEventListener("click", closeDrawer);
+    var ds = $("#drawer-scrim"); if (ds) ds.addEventListener("click", closeDrawer);
+    var dsp = $("#dl-species"); if (dsp) dsp.addEventListener("click", function () {
+      var box = $("#drawer-species"); if (box) box.style.display = box.style.display === "none" ? "grid" : "none";
+    });
+    // close drawer when a drawer link with a hash is clicked
+    Array.prototype.forEach.call(document.querySelectorAll(".drawer-nav a.drawer-link"), function (a) {
+      a.addEventListener("click", function () { setTimeout(closeDrawer, 60); });
+    });
   }
   function debounce(fn, ms) { var t; return function () { clearTimeout(t); var a = arguments, self = this; t = setTimeout(function () { fn.apply(self, a); }, ms); }; }
 
@@ -286,9 +349,63 @@
     l.classList.add("hide"); setTimeout(function () { l.style.display = "none"; }, 700);
   }
 
+  /* ---------- auth gate ---------- */
+  var AUTH_KEY = "am369:auth:v1";
+  function currentAuth() { try { return JSON.parse(localStorage.getItem(AUTH_KEY) || "null"); } catch (e) { return null; } }
+  function setAuth(obj) { try { localStorage.setItem(AUTH_KEY, JSON.stringify(obj)); } catch (e) {} applyAuthLabel(); }
+  function applyAuthLabel() {
+    var a = currentAuth(); var lbl = $("#drawer-user-label");
+    if (lbl) lbl.textContent = a && a.type === "google" ? (a.name || a.email || "Signed in") : "Browsing as Guest";
+  }
+  function showGate() {
+    var gate = $("#gate"); if (!gate) return;
+    var auth = state.settings.auth || {};
+    // if entry not required, or already chosen, skip gate
+    if (auth.requireEntry === false || currentAuth()) { gate.classList.add("hide"); return; }
+    // configure buttons
+    var gbtn = $("#gate-google"), guest = $("#gate-guest");
+    if (auth.googleEnabled && auth.googleClientId) { gbtn.style.display = "inline-flex"; initGoogle(auth.googleClientId); }
+    if (auth.guestEnabled === false) { guest.style.display = "none"; }
+    gate.classList.remove("hide");
+    guest.addEventListener("click", function () { setAuth({ type: "guest", at: Date.now() }); gate.classList.add("hide"); });
+    gbtn.addEventListener("click", function () {
+      if (window.google && google.accounts && google.accounts.id) { google.accounts.id.prompt(); }
+      else { toast("Google sign-in not configured yet.", "err"); }
+    });
+  }
+  function initGoogle(clientId) {
+    // Loads Google Identity Services; requires the site's domain added as an
+    // authorized JavaScript origin in the Google Cloud OAuth client.
+    if (document.getElementById("gis-script")) return;
+    var s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client"; s.async = true; s.defer = true; s.id = "gis-script";
+    s.onload = function () {
+      try {
+        google.accounts.id.initialize({
+          client_id: clientId,
+          callback: function (resp) {
+            var payload = parseJwt(resp.credential) || {};
+            setAuth({ type: "google", name: payload.name, email: payload.email, at: Date.now() });
+            var gate = $("#gate"); if (gate) gate.classList.add("hide");
+            toast("Signed in.", "ok");
+          }
+        });
+      } catch (e) { console.warn("GIS init failed", e); }
+    };
+    document.head.appendChild(s);
+  }
+  function parseJwt(token) {
+    try { return JSON.parse(decodeURIComponent(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")).split("").map(function (c) { return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2); }).join(""))); }
+    catch (e) { return null; }
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     wire();
-    var minTime = new Promise(function (res) { setTimeout(res, 2850); }); // matches particle formation + drift-out
-    Promise.all([load(), minTime]).then(hideLoader);
+    var minTime = new Promise(function (res) { setTimeout(res, 2850); });
+    Promise.all([load(), minTime]).then(function () {
+      hideLoader();
+      applyAuthLabel();
+      showGate();
+    });
   });
 })();
