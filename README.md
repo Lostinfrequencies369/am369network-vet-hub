@@ -82,6 +82,24 @@ Every thumbnail field in the admin panel has an **Upload to Drive** button next 
 
 No SQL, no paid backend — Drive itself is the file store, and folders are created automatically on first use per section/species.
 
+### Websites / Data / Music / Photos folder + Sheet
+
+The same script can also set up a separate structure for general site data:
+
+```
+Websites/
+  Data/
+  Music/
+  Photos/
+  AM369 Website Data   (Google Sheet — tabs: Data, Music, Photos)
+```
+
+Run it once, either:
+- In the Apps Script editor: select `setupWebsiteFolders` from the function dropdown → Run, or
+- After deploying, visit `<your-deployment-url>?action=setup&key=YOUR_ADMIN_KEY` in a browser.
+
+It's safe to run more than once — it reuses the folders and sheet instead of duplicating them. The Sheet's three tabs give you a ready place to log music/photo file links and any other site data outside the JSON collections.
+
 ## Multi-level caching
 
 - **L1 — memory**: every JSON collection and every resolved image sits in an in-memory cache for the current tab (instant, no I/O).

@@ -25,6 +25,16 @@
  *     Buffalo/
  *     ... (created on first upload per species)
  *
+ * Websites/                       (created by setupWebsiteFolders, run once)
+ *   Data/
+ *   Music/
+ *   Photos/
+ *   AM369 Website Data            (a Google Sheet with Data/Music/Photos tabs)
+ *
+ * To create the Websites structure: run `setupWebsiteFolders` once from the
+ * Apps Script editor, OR after deploying, visit:
+ *   <your-deployment-url>?action=setup&key=YOUR_ADMIN_KEY
+ *
  * SECURITY NOTE
  * "Anyone with the link" can call doPost, so this checks a shared secret
  * (ADMIN_KEY) sent from the admin panel. Change ADMIN_KEY below to your
@@ -34,11 +44,61 @@
  */
 
 var ROOT_FOLDER_NAME = "AM369 Network Media";
+var WEBSITE_FOLDER_NAME = "Websites";
 var ADMIN_KEY = "AnkiMunky321"; // keep in sync with admin panel passcode, or set your own
 
 function setup() {
   getOrCreateFolder_(ROOT_FOLDER_NAME, DriveApp.getRootFolder());
   Logger.log("Root media folder ready.");
+}
+
+/**
+ * Creates:
+ *   Websites/
+ *     Data/
+ *     Music/
+ *     Photos/
+ *     AM369 Website Data  (a new Google Sheet, one tab per data type)
+ * Safe to run multiple times — reuses existing folders/sheet instead of duplicating.
+ * Run this once from the editor (Run > setupWebsiteFolders), or hit the deployed
+ * URL with ?action=setup&key=YOUR_ADMIN_KEY to trigger it remotely.
+ */
+function setupWebsiteFolders() {
+  var root = getOrCreateFolder_(WEBSITE_FOLDER_NAME, DriveApp.getRootFolder());
+  var dataFolder = getOrCreateFolder_("Data", root);
+  var musicFolder = getOrCreateFolder_("Music", root);
+  var photosFolder = getOrCreateFolder_("Photos", root);
+
+  var sheet = getOrCreateSheetInFolder_("AM369 Website Data", root);
+
+  var result = {
+    ok: true,
+    websitesFolder: root.getUrl(),
+    dataFolder: dataFolder.getUrl(),
+    musicFolder: musicFolder.getUrl(),
+    photosFolder: photosFolder.getUrl(),
+    sheetUrl: sheet.getUrl()
+  };
+  Logger.log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+function getOrCreateSheetInFolder_(name, folder) {
+  var it = folder.getFilesByName(name);
+  if (it.hasNext()) return SpreadsheetApp.open(it.next());
+  var ss = SpreadsheetApp.create(name);
+  var file = DriveApp.getFileById(ss.getId());
+  folder.addFile(file);
+  DriveApp.getRootFolder().removeFile(file); // remove from default My Drive root, keep only in target folder
+  // Set up starter tabs matching the site's data types.
+  var first = ss.getSheets()[0];
+  first.setName("Data");
+  first.getRange(1, 1, 1, 3).setValues([["Key", "Value", "Notes"]]);
+  var musicSheet = ss.insertSheet("Music");
+  musicSheet.getRange(1, 1, 1, 4).setValues([["Title", "File URL", "Artist/Source", "Notes"]]);
+  var photosSheet = ss.insertSheet("Photos");
+  photosSheet.getRange(1, 1, 1, 4).setValues([["Title", "File URL", "Category", "Notes"]]);
+  return ss;
 }
 
 function doPost(e) {
@@ -78,7 +138,16 @@ function doPost(e) {
   }
 }
 
-function doGet() {
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+  if (p.action === "setup") {
+    if (p.key !== ADMIN_KEY) return jsonOut_({ ok: false, error: "Unauthorized" });
+    try {
+      return jsonOut_(setupWebsiteFolders());
+    } catch (err) {
+      return jsonOut_({ ok: false, error: String(err) });
+    }
+  }
   return jsonOut_({ ok: true, message: "AM 369 Network Drive Uploader is running." });
 }
 
