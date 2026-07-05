@@ -1,0 +1,18 @@
+{
+  "siteName": "AM 369 Network",
+  "designer": "Designed by Dr. Ankit Malik",
+  "tagline": "Veterinary Digital Resource Network",
+  "logo": "assets/images/logo.png",
+  "theme": "premium-dark",
+  "schemaVersion": 1,
+  "ads": {
+    "enabled": false,
+    "provider": "none",
+    "slots": {
+      "homeTop": { "enabled": false, "code": "" },
+      "homeInline": { "enabled": false, "code": "" },
+      "sidebar": { "enabled": false, "code": "" },
+      "blogDetail": { "enabled": false, "code": "" }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "blog_001",
+    "title": "Common Causes of Fever in Cattle",
+    "slug": "common-causes-fever-cattle",
+    "author": "Dr. Ankit Malik",
+    "date": "2026-07-05",
+    "category": "Medicine",
+    "species": ["Cattle", "Buffalo"],
+    "thumbnail": "",
+    "summary": "A field guide to recognising and triaging pyrexia in cattle before it escalates.",
+    "body": "Fever in cattle is a sign not a diagnosis. This piece walks through the common infectious and non-infectious causes seen in the field how to take an accurate rectal temperature and when a raised temperature warrants immediate treatment versus watchful monitoring.\n\nKey causes covered include tick-borne disease respiratory infection mastitis and post-calving complications. The goal is a quick decision path you can run at the animal's side.",
+    "tags": ["fever", "cattle", "medicine"],
+    "status": "published",
+    "featured": true
+  },
+  {
+    "id": "blog_002",
+    "title": "Reading a Vaccination Schedule Properly",
+    "slug": "reading-vaccination-schedule",
+    "author": "Dr. Ankit Malik",
+    "date": "2026-07-05",
+    "category": "Disease Control",
+    "species": ["Cattle", "Buffalo", "Goat", "Sheep"],
+    "thumbnail": "",
+    "summary": "How to tell whether a herd is actually protected not just vaccinated on paper.",
+    "body": "A vaccination record only means something if the timing dose and cold chain were all correct. This article explains how to audit a schedule spot gaps in coverage and understand why booster timing matters as much as the first dose.",
+    "tags": ["vaccination", "disease control", "herd health"],
+    "status": "published",
+    "featured": false
+  }
+]

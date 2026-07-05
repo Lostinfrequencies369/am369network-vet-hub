@@ -1,0 +1,16 @@
+[
+  { "id": "sp_cattle", "name": "Cattle", "thumbnail": "", "description": "Cattle apps blogs medicines and resources." },
+  { "id": "sp_buffalo", "name": "Buffalo", "thumbnail": "", "description": "Buffalo related veterinary resources." },
+  { "id": "sp_sheep", "name": "Sheep", "thumbnail": "", "description": "Sheep health and treatment resources." },
+  { "id": "sp_goat", "name": "Goat", "thumbnail": "", "description": "Goat health and treatment resources." },
+  { "id": "sp_dog", "name": "Dog", "thumbnail": "", "description": "Canine apps blogs and references." },
+  { "id": "sp_cat", "name": "Cat", "thumbnail": "", "description": "Feline apps blogs and references." },
+  { "id": "sp_horse", "name": "Horse", "thumbnail": "", "description": "Equine health resources." },
+  { "id": "sp_poultry", "name": "Poultry", "thumbnail": "", "description": "Poultry disease and management resources." },
+  { "id": "sp_camel", "name": "Camel", "thumbnail": "", "description": "Camel health resources." },
+  { "id": "sp_pig", "name": "Pig", "thumbnail": "", "description": "Swine health resources." },
+  { "id": "sp_rabbit", "name": "Rabbit", "thumbnail": "", "description": "Rabbit health resources." },
+  { "id": "sp_birds", "name": "Birds", "thumbnail": "", "description": "Avian health resources." },
+  { "id": "sp_fish", "name": "Fish", "thumbnail": "", "description": "Aquaculture health resources." },
+  { "id": "sp_others", "name": "Others", "thumbnail": "", "description": "Other species resources." }
+]

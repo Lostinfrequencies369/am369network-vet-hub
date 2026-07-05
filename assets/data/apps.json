@@ -1,0 +1,50 @@
+[
+  {
+    "id": "app_001",
+    "title": "Veterinary Drug Reference (FlowVet)",
+    "url": "https://script.google.com/",
+    "description": "Searchable drug database with species-specific dosing drug classes and safety flags.",
+    "category": "Google Web Apps",
+    "species": ["Cattle", "Buffalo", "Dog", "Cat"],
+    "thumbnail": "",
+    "status": "active",
+    "featured": true,
+    "buttonText": "Open App"
+  },
+  {
+    "id": "app_002",
+    "title": "Vet Tx Handbook",
+    "url": "https://script.google.com/",
+    "description": "Treatment reference by disease and system with image support and keyword search.",
+    "category": "Google Web Apps",
+    "species": ["Cattle", "Buffalo", "Goat", "Sheep"],
+    "thumbnail": "",
+    "status": "active",
+    "featured": true,
+    "buttonText": "Open App"
+  },
+  {
+    "id": "app_003",
+    "title": "SyncVet Pro",
+    "url": "https://script.google.com/",
+    "description": "Estrous synchronisation planner with guided questionnaire and downloadable schedule.",
+    "category": "Reproduction",
+    "species": ["Cattle", "Buffalo"],
+    "thumbnail": "",
+    "status": "active",
+    "featured": false,
+    "buttonText": "Open App"
+  },
+  {
+    "id": "app_004",
+    "title": "NeuroVet Dx",
+    "url": "https://script.google.com/",
+    "description": "Neurological case assessment covering lesion localisation and seizure management.",
+    "category": "Medicine",
+    "species": ["Dog", "Cat"],
+    "thumbnail": "",
+    "status": "active",
+    "featured": false,
+    "buttonText": "Open App"
+  }
+]

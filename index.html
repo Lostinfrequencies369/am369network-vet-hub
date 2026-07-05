@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="description" content="AM 369 Network — Veterinary Digital Resource Network. Designed by Dr. Ankit Malik.">
+<title>AM 369 Network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- START / LOADER -->
+<div id="loader">
+  <svg class="loader-mark" viewBox="0 0 76 76" fill="none">
+    <circle cx="38" cy="38" r="35" stroke="url(#g)" stroke-width="3"/>
+    <path d="M38 16 L38 60 M22 28 Q38 20 54 28 M22 48 Q38 56 54 48" stroke="url(#g)" stroke-width="3" fill="none"/>
+    <defs><linearGradient id="g" x1="0" y1="0" x2="76" y2="76">
+      <stop stop-color="#3DD8E6"/><stop offset="1" stop-color="#9A6BFF"/>
+    </linearGradient></defs>
+  </svg>
+  <div class="loader-title">AM 369 Network</div>
+  <div class="loader-sub">Designed by Dr. Ankit Malik</div>
+  <div class="loader-bar"><i></i></div>
+</div>
+
+<div class="ambient"><span></span><span></span><span></span></div>
+
+<!-- HEADER -->
+<header class="site">
+  <div class="nav">
+    <a class="brand" href="index.html">
+      <svg class="brand-mark" viewBox="0 0 34 34" fill="none">
+        <circle cx="17" cy="17" r="15" stroke="#3DD8E6" stroke-width="1.6"/>
+        <path d="M17 7 L17 27 M10 13 Q17 9 24 13 M10 21 Q17 25 24 21" stroke="#9A6BFF" stroke-width="1.6" fill="none"/>
+      </svg>
+      <span><span id="brand-name">AM 369 Network</span><small id="brand-designer">Designed by Dr. Ankit Malik</small></span>
+    </a>
+    <div class="nav-search">
+      <span>🔍</span>
+      <input id="global-search" type="search" placeholder="Search apps, blogs, resources…" aria-label="Search">
+    </div>
+    <select id="species-select" class="species-select" aria-label="Animal Species"></select>
+    <a class="nav-admin" href="admin.html">Admin</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero wrap">
+  <div class="eyebrow">Veterinary Digital Resource Network</div>
+  <h1>Tools and knowledge for better animal health decisions.</h1>
+  <p>A premium hub for veterinary web apps, treatment references, species-wise resources and field notes — built and maintained by Dr. Ankit Malik.</p>
+  <div class="hero-actions">
+    <a class="btn btn-primary" href="#apps">Explore web apps</a>
+    <a class="btn btn-ghost" href="#blogs">Read the blog</a>
+  </div>
+</section>
+
+<div class="wrap"><div id="ad-top" class="ad-slot hidden" data-slot="homeTop">Ad space</div></div>
+
+<!-- WEB APPS -->
+<section class="block wrap" id="apps">
+  <div class="section-head">
+    <div><div class="eyebrow">Web Apps</div><h2>Featured Google Web Apps</h2></div>
+  </div>
+  <div id="apps-grid" class="grid cols-4">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</section>
+
+<!-- DIRECTORIES -->
+<section class="block wrap" id="directories">
+  <div class="section-head">
+    <div><div class="eyebrow">Resources</div><h2>Directories &amp; Categories</h2></div>
+  </div>
+  <div id="dir-grid" class="grid cols-3">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</section>
+
+<div class="wrap"><div id="ad-inline" class="ad-slot hidden" data-slot="homeInline">Ad space</div></div>
+
+<!-- BLOGS -->
+<section class="block wrap" id="blogs">
+  <div class="section-head">
+    <div><div class="eyebrow">Blog</div><h2>Latest Articles</h2></div>
+  </div>
+  <div id="blogs-grid" class="grid cols-3">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site">
+  <div class="wrap">
+    <span><b>AM 369 Network</b> — Veterinary Digital Resource Network</span>
+    <span>Designed by Dr. Ankit Malik · &copy; 2026</span>
+  </div>
+</footer>
+
+<!-- BLOG MODAL -->
+<div class="modal-overlay" id="blog-modal">
+  <div class="modal">
+    <button class="modal-close" id="bm-close" aria-label="Close">✕</button>
+    <div class="meta" id="bm-meta"></div>
+    <h2 id="bm-title"></h2>
+    <div id="bm-ad" class="ad-slot hidden"></div>
+    <div class="blog-body" id="bm-body"></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script src="assets/js/data-service.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

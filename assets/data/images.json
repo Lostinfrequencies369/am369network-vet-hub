@@ -1,0 +1,4 @@
+[
+  { "id": "img_001", "title": "Site Logo", "url": "", "type": "logo", "alt": "AM 369 Network logo", "link": "global" },
+  { "id": "img_002", "title": "Hero Background", "url": "", "type": "hero", "alt": "Hero background", "link": "home" }
+]

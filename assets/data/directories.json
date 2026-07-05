@@ -1,0 +1,41 @@
+[
+  {
+    "id": "dir_001",
+    "title": "Veterinary Drug Reference",
+    "description": "Drug categories and treatment resources.",
+    "thumbnail": "",
+    "species": ["All"],
+    "children": [
+      { "id": "sub_001", "title": "Antimicrobials", "description": "Antibiotic drug resources.", "thumbnail": "" },
+      { "id": "sub_002", "title": "Antiparasitics", "description": "Dewormers and ectoparasiticides.", "thumbnail": "" },
+      { "id": "sub_003", "title": "Hormones", "description": "Reproductive and metabolic hormones.", "thumbnail": "" },
+      { "id": "sub_004", "title": "Vaccines", "description": "Vaccine references and schedules.", "thumbnail": "" }
+    ]
+  },
+  {
+    "id": "dir_002",
+    "title": "Reproduction",
+    "description": "Reproductive management resources.",
+    "thumbnail": "",
+    "species": ["Cattle", "Buffalo"],
+    "children": [
+      { "id": "sub_005", "title": "AI", "description": "Artificial insemination.", "thumbnail": "" },
+      { "id": "sub_006", "title": "Pregnancy Diagnosis", "description": "PD techniques.", "thumbnail": "" },
+      { "id": "sub_007", "title": "Calving", "description": "Calving management.", "thumbnail": "" },
+      { "id": "sub_008", "title": "Prolapse", "description": "Prolapse management.", "thumbnail": "" }
+    ]
+  },
+  {
+    "id": "dir_003",
+    "title": "Medicine",
+    "description": "Clinical medicine categories.",
+    "thumbnail": "",
+    "species": ["All"],
+    "children": [
+      { "id": "sub_009", "title": "Fever", "description": "Pyrexia workups.", "thumbnail": "" },
+      { "id": "sub_010", "title": "Digestive", "description": "GI conditions.", "thumbnail": "" },
+      { "id": "sub_011", "title": "Respiratory", "description": "Respiratory conditions.", "thumbnail": "" },
+      { "id": "sub_012", "title": "Toxicology", "description": "Poisoning and toxins.", "thumbnail": "" }
+    ]
+  }
+]
