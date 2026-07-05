@@ -11,7 +11,7 @@
   // Demo gate only. Change this, but understand it is visible in source.
   var DEMO_PASSCODE = "AnkiMunky321";
 
-  var db = { apps: [], blogs: [], directories: [], species: [], images: [], settings: {}, content: {}, medicines: [], systems: [] };
+  var db = { apps: [], blogs: [], directories: [], species: [], images: [], settings: {}, content: {}, medicines: [], modules: [] };
   var speciesNames = [];
 
   function $(s, r) { return (r || document).querySelector(s); }
@@ -56,11 +56,11 @@
     return Promise.all([
       DataService.get("apps"), DataService.get("blogs"), DataService.get("directories"),
       DataService.get("species"), DataService.get("images"), DataService.get("settings"),
-      DataService.get("content"), DataService.get("medicines"), DataService.get("systems")
+      DataService.get("content"), DataService.get("medicines"), DataService.get("modules")
     ]).then(function (r) {
       db.apps = r[0] || []; db.blogs = r[1] || []; db.directories = r[2] || [];
       db.species = r[3] || []; db.images = r[4] || []; db.settings = r[5] || {};
-      db.content = r[6] || {}; db.medicines = r[7] || []; db.systems = r[8] || [];
+      db.content = r[6] || {}; db.medicines = r[7] || []; db.modules = r[8] || [];
       speciesNames = db.species.map(function (s) { return s.name; });
     });
   }
@@ -139,19 +139,20 @@
     }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No medicine records yet.</td></tr>';
   }
 
-  function renderSystems(q) {
-    var body = $("#systems-tbody"); if (!body) return;
-    var list = tableSearchFilter(db.systems, q, ["name"]);
-    body.innerHTML = list.map(function (s) {
+  function renderModules(q) {
+    var body = $("#modules-tbody"); if (!body) return;
+    var list = tableSearchFilter(db.modules.slice().sort(function (a,b){return (a.order||0)-(b.order||0);}), q, ["title", "subtitle", "link"]);
+    body.innerHTML = list.map(function (m) {
       return '<tr>' +
-        '<td>' + esc(s.name) + '</td>' +
-        '<td>' + esc(s.icon || "") + '</td>' +
-        '<td>' + (s.count != null ? esc(s.count) : "") + '</td>' +
+        '<td>' + (m.order != null ? esc(m.order) : "") + '</td>' +
+        '<td>' + (m.icon ? esc(m.icon) + " " : "") + esc(m.title) + '</td>' +
+        '<td>' + esc(m.subtitle || "") + '</td>' +
+        '<td>' + esc(m.link || "") + '</td>' +
         '<td class="row-actions">' +
-          '<button class="btn btn-ghost btn-sm" data-edit-sys="' + s.id + '">Edit</button>' +
-          '<button class="btn btn-danger btn-sm" data-del-sys="' + s.id + '">Delete</button>' +
+          '<button class="btn btn-ghost btn-sm" data-edit-mod="' + m.id + '">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" data-del-mod="' + m.id + '">Delete</button>' +
         '</td></tr>';
-    }).join('') || '<tr><td colspan="4" style="color:var(--muted)">No systems yet.</td></tr>';
+    }).join('') || '<tr><td colspan="5" style="color:var(--muted)">No modules yet.</td></tr>';
   }
 
   function renderDirs(q) {
@@ -182,7 +183,7 @@
   }
 
   function renderAllTables() {
-    renderStats(); renderApps(); renderBlogs(); renderMedicines(); renderSystems(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm(); renderContentForm(); renderAuthForm(); renderSubForm();
+    renderStats(); renderApps(); renderBlogs(); renderMedicines(); renderModules(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm(); renderContentForm(); renderAuthForm(); renderSubForm();
   }
 
   /* ---------- modal engine ---------- */
@@ -512,32 +513,38 @@
     };
   }
 
-  /* ---------- SYSTEM form ---------- */
-  function sysForm(s) {
-    s = s || {};
-    return '<h3>' + (s.id ? "Edit" : "Add") + ' Body System</h3>' +
-      '<div class="field"><label>Name</label><input id="f-name" value="' + esc(s.name) + '"></div>' +
+  /* ---------- MODULE form ---------- */
+  function modForm(m) {
+    m = m || {};
+    return '<h3>' + (m.id ? "Edit" : "Add") + ' Module</h3>' +
+      '<div class="field"><label>Title</label><input id="f-title" value="' + esc(m.title) + '"></div>' +
+      '<div class="field"><label>Subtitle</label><input id="f-sub" value="' + esc(m.subtitle) + '"></div>' +
       '<div class="form-row">' +
-        '<div class="field"><label>Icon (emoji)</label><input id="f-icon" value="' + esc(s.icon) + '" placeholder="🫁"></div>' +
-        '<div class="field"><label>Drug count</label><input id="f-count" type="number" value="' + esc(s.count != null ? s.count : "") + '"></div>' +
+        '<div class="field"><label>Icon (emoji)</label><input id="f-icon" value="' + esc(m.icon) + '" placeholder="💊"></div>' +
+        '<div class="field"><label>Order</label><input id="f-order" type="number" value="' + esc(m.order != null ? m.order : "") + '"></div>' +
       '</div>' +
-      thumbField("f-image", s.image, "Image URL (optional, overrides emoji)") +
+      '<div class="field"><label>Link (#section or https://…)</label><input id="f-link" value="' + esc(m.link || "#") + '"></div>' +
+      thumbField("f-image", m.image, "Circular thumbnail image (optional, overrides emoji)") +
       '<div class="modal-foot"><button class="btn btn-ghost" id="m-cancel">Cancel</button><button class="btn btn-primary" id="m-save">Save</button></div>';
   }
-  function editSys(id) {
-    var s = db.systems.find(function (x) { return x.id === id; });
-    openModal(sysForm(s));
-    wireDriveUpload("f-image", "Systems", function () { return $("#f-name") ? $("#f-name").value : ""; });
+  function editMod(id) {
+    var m = db.modules.find(function (x) { return x.id === id; });
+    openModal(modForm(m));
+    wireDriveUpload("f-image", "Modules", function () { return $("#f-title") ? $("#f-title").value : ""; });
     $("#m-cancel").onclick = closeModal;
     $("#m-save").onclick = function () {
       var btn = this;
       withBusy(btn, "Saving…", function () {
-        var cnt = $("#f-count").value.trim();
-        var obj = { id: id || uid("sys"), name: $("#f-name").value.trim(), icon: $("#f-icon").value.trim(), count: cnt === "" ? null : Number(cnt), image: $("#f-image").value.trim() };
-        if (!obj.name) { toast("Name required.", "err"); return; }
-        if (id) { var i = db.systems.findIndex(function (x) { return x.id === id; }); db.systems[i] = obj; }
-        else db.systems.push(obj);
-        save("systems"); renderSystems($("#systems-search").value); closeModal(); toast("System saved.", "ok");
+        var ord = $("#f-order").value.trim();
+        var obj = {
+          id: id || uid("mod"), title: $("#f-title").value.trim(), subtitle: $("#f-sub").value.trim(),
+          icon: $("#f-icon").value.trim(), order: ord === "" ? (db.modules.length + 1) : Number(ord),
+          link: $("#f-link").value.trim() || "#", image: $("#f-image").value.trim()
+        };
+        if (!obj.title) { toast("Title required.", "err"); return; }
+        if (id) { var i = db.modules.findIndex(function (x) { return x.id === id; }); db.modules[i] = obj; }
+        else db.modules.push(obj);
+        save("modules"); renderModules($("#modules-search").value); closeModal(); toast("Module saved.", "ok");
       });
     };
   }
@@ -670,7 +677,7 @@
   function switchView(name) {
     $$(".view").forEach(function (v) { v.classList.toggle("active", v.id === "view-" + name); });
     $$(".sb-nav a").forEach(function (a) { a.classList.toggle("active", a.dataset.view === name); });
-    $("#topbar-title").textContent = ({ dashboard: "Dashboard", content: "Site Content", apps: "Web Apps", systems: "Body Systems", medicines: "Medicines & Drug Records", blogs: "Blogs & Articles", directories: "Directories", species: "Species", settings: "Settings & Backup" })[name] || "Dashboard";
+    $("#topbar-title").textContent = ({ dashboard: "Dashboard", content: "Site Content", apps: "Web Apps", modules: "Modules", medicines: "Medicines & Drug Records", blogs: "Blogs & Articles", directories: "Directories", species: "Species", settings: "Settings & Backup" })[name] || "Dashboard";
     $("#sidebar").classList.remove("open");
   }
 
@@ -681,8 +688,8 @@
       t = e.target.closest("[data-del-app]"); if (t) { var id = t.dataset.delApp; var a = db.apps.find(function (x){return x.id===id;}); return confirmDelete(a ? a.title : "app", function () { db.apps = db.apps.filter(function (x){return x.id!==id;}); save("apps"); renderApps($("#apps-search").value); renderStats(); toast("Deleted.", "ok"); }); }
       t = e.target.closest("[data-edit-med]"); if (t) return editMed(t.dataset.editMed);
       t = e.target.closest("[data-del-med]"); if (t) { var mid = t.dataset.delMed; var mm = db.medicines.find(function(x){return x.id===mid;}); return confirmDelete(mm?mm.name:"medicine", function(){ db.medicines = db.medicines.filter(function(x){return x.id!==mid;}); save("medicines"); renderMedicines($("#medicines-search").value); renderStats(); toast("Deleted.","ok"); }); }
-      t = e.target.closest("[data-edit-sys]"); if (t) return editSys(t.dataset.editSys);
-      t = e.target.closest("[data-del-sys]"); if (t) { var sysid = t.dataset.delSys; var sy = db.systems.find(function(x){return x.id===sysid;}); return confirmDelete(sy?sy.name:"system", function(){ db.systems = db.systems.filter(function(x){return x.id!==sysid;}); save("systems"); renderSystems($("#systems-search").value); toast("Deleted.","ok"); }); }
+      t = e.target.closest("[data-edit-mod]"); if (t) return editMod(t.dataset.editMod);
+      t = e.target.closest("[data-del-mod]"); if (t) { var modid = t.dataset.delMod; var mo = db.modules.find(function(x){return x.id===modid;}); return confirmDelete(mo?mo.title:"module", function(){ db.modules = db.modules.filter(function(x){return x.id!==modid;}); save("modules"); renderModules($("#modules-search").value); toast("Deleted.","ok"); }); }
       t = e.target.closest("[data-edit-blog]"); if (t) return editBlog(t.dataset.editBlog);
       t = e.target.closest("[data-del-blog]"); if (t) { var bid = t.dataset.delBlog; var b = db.blogs.find(function(x){return x.id===bid;}); return confirmDelete(b?b.title:"blog", function(){ db.blogs = db.blogs.filter(function(x){return x.id!==bid;}); save("blogs"); renderBlogs($("#blogs-search").value); renderStats(); toast("Deleted.","ok"); }); }
       t = e.target.closest("[data-edit-dir]"); if (t) return editDir(t.dataset.editDir);
@@ -701,14 +708,14 @@
       // add buttons
       $("#add-app").onclick = function () { editApp(null); };
       $("#add-medicine").onclick = function () { editMed(null); };
-      $("#add-system").onclick = function () { editSys(null); };
+      $("#add-module").onclick = function () { editMod(null); };
       $("#add-blog").onclick = function () { editBlog(null); };
       $("#add-dir").onclick = function () { editDir(null); };
       $("#add-sp").onclick = function () { editSp(null); };
       // searches
       $("#apps-search").oninput = function () { renderApps(this.value); };
       $("#medicines-search").oninput = function () { renderMedicines(this.value); };
-      $("#systems-search").oninput = function () { renderSystems(this.value); };
+      $("#modules-search").oninput = function () { renderModules(this.value); };
       $("#blogs-search").oninput = function () { renderBlogs(this.value); };
       $("#dirs-search").oninput = function () { renderDirs(this.value); };
       $("#species-search").oninput = function () { renderSpecies(this.value); };

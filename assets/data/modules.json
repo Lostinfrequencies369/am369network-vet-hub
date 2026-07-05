@@ -1,0 +1,14 @@
+[
+  { "id": "mod_webapps", "title": "Web Apps", "subtitle": "Smart veterinary applications", "icon": "💻", "image": "", "link": "#apps", "order": 1 },
+  { "id": "mod_drugref", "title": "Drug Reference", "subtitle": "Comprehensive drug database", "icon": "💊", "image": "", "link": "#medicines", "order": 2 },
+  { "id": "mod_dose", "title": "Dose Calculators", "subtitle": "Species-wise accurate dosing", "icon": "🧮", "image": "", "link": "#", "order": 3 },
+  { "id": "mod_fluid", "title": "Fluid Therapy Calculator", "subtitle": "Easy & precise fluid management", "icon": "💧", "image": "", "link": "#", "order": 4 },
+  { "id": "mod_protocols", "title": "Treatment Protocols", "subtitle": "Evidence-based therapies", "icon": "📋", "image": "", "link": "#", "order": 5 },
+  { "id": "mod_vacc", "title": "Vaccination & Deworming", "subtitle": "Schedules & guidelines", "icon": "💉", "image": "", "link": "#", "order": 6 },
+  { "id": "mod_clinical", "title": "Clinical References", "subtitle": "Books, guidelines & journals", "icon": "📚", "image": "", "link": "#directories", "order": 7 },
+  { "id": "mod_blogs", "title": "Blogs & Articles", "subtitle": "Latest veterinary insights", "icon": "📝", "image": "", "link": "#blogs", "order": 8 },
+  { "id": "mod_cases", "title": "Case Records", "subtitle": "Organised & secure case management", "icon": "📁", "image": "", "link": "#", "order": 9 },
+  { "id": "mod_diag", "title": "Diagnostic Tools", "subtitle": "Lab values & interpretations", "icon": "🔬", "image": "", "link": "#", "order": 10 },
+  { "id": "mod_emergency", "title": "Emergency Protocols", "subtitle": "Critical care guidance", "icon": "🚨", "image": "", "link": "#", "order": 11 },
+  { "id": "mod_more", "title": "And More", "subtitle": "Custom tools coming soon", "icon": "✨", "image": "", "link": "#", "order": 12 }
+]

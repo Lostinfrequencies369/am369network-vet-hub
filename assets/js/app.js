@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  var state = { apps: [], blogs: [], directories: [], medicines: [], systems: [], species: [], settings: {}, content: {}, filterSpecies: "All", query: "" };
+  var state = { apps: [], blogs: [], directories: [], medicines: [], modules: [], species: [], settings: {}, content: {}, filterSpecies: "All", query: "" };
 
   function $(s, r) { return (r || document).querySelector(s); }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
@@ -132,21 +132,23 @@
     reveal(host);
   }
 
-  function renderSystems() {
-    var host = $("#systems-grid"); if (!host) return;
-    var list = state.systems.filter(function (s) { return matchQuery(s, ["name"]); });
+  function renderModules() {
+    var host = $("#modules-grid"); if (!host) return;
+    var list = state.modules.slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); })
+      .filter(function (m) { return matchQuery(m, ["title", "subtitle"]); });
     host.innerHTML = "";
-    if (!list.length) { host.appendChild(el("div", "empty", "No systems match your search.")); return; }
-    list.forEach(function (s) {
-      var c = el("div", "sys-card");
-      var icon = s.image ? '<img data-src="' + esc(s.image) + '" alt="">' : esc(s.icon || "🩺");
+    if (!list.length) { host.appendChild(el("div", "empty", "No modules yet. Add them from the admin panel.")); return; }
+    list.forEach(function (m) {
+      var c = el("div", "mod-card");
+      var thumb = m.image ? '<img data-src="' + esc(m.image) + '" alt="">' : esc(m.icon || "🩺");
       c.innerHTML =
-        '<div class="sys-ic">' + icon + '</div>' +
-        '<h4>' + esc(s.name) + '</h4>' +
-        '<div class="count">' + (s.count != null ? esc(s.count) + " drugs" : "") + '</div>';
+        '<div class="circ-thumb">' + thumb + '</div>' +
+        '<h4>' + esc(m.title) + '</h4>' +
+        '<div class="sub">' + esc(m.subtitle || "") + '</div>';
       c.addEventListener("click", function () {
-        state.query = s.name; var search = $("#global-search"); if (search) search.value = "";
-        var target = $("#medicines"); if (target) target.scrollIntoView({ behavior: "smooth" });
+        var link = m.link || "#";
+        if (link.charAt(0) === "#" && link.length > 1) { var t = $(link); if (t) t.scrollIntoView({ behavior: "smooth" }); }
+        else if (link && link !== "#") { window.open(link, "_blank", "noopener"); }
       });
       host.appendChild(c);
     });
@@ -259,7 +261,7 @@
     var p2 = $("#hero-cta-secondary"); if (p2) { if (hero.ctaSecondaryText) p2.textContent = hero.ctaSecondaryText; if (hero.ctaSecondaryHref) p2.href = hero.ctaSecondaryHref; }
 
     var sec = c.sections || {};
-    ["apps", "directories", "medicines", "blogs", "systems"].forEach(function (key) {
+    ["modules", "apps", "directories", "medicines", "blogs"].forEach(function (key) {
       var s = sec[key]; if (!s) return;
       setText(key + "-eyebrow", s.eyebrow); setText(key + "-title", s.title);
     });
@@ -299,7 +301,7 @@
   }
 
   function renderAll() {
-    renderSystems(); renderApps(); renderBlogs(); renderDirectories(); renderMedicines();
+    renderModules(); renderApps(); renderBlogs(); renderDirectories(); renderMedicines();
   }
 
   /* ---------- load ---------- */
@@ -307,11 +309,11 @@
     return Promise.all([
       DataService.get("settings"), DataService.get("species"), DataService.get("content"),
       DataService.get("apps"), DataService.get("blogs"), DataService.get("directories"),
-      DataService.get("medicines"), DataService.get("systems")
+      DataService.get("medicines"), DataService.get("modules")
     ]).then(function (r) {
       state.settings = r[0] || {}; state.species = r[1] || []; state.content = r[2] || {};
       state.apps = r[3] || []; state.blogs = r[4] || []; state.directories = r[5] || [];
-      state.medicines = r[6] || []; state.systems = r[7] || [];
+      state.medicines = r[6] || []; state.modules = r[7] || [];
       applySettings(); applyContent(); renderSpeciesOptions(); buildDrawer(); renderAll(); applyAllAdSlots();
       reveal(document);
     }).catch(function (e) {
@@ -360,18 +362,21 @@
   function showGate() {
     var gate = $("#gate"); if (!gate) return;
     var auth = state.settings.auth || {};
-    // if entry not required, or already chosen, skip gate
     if (auth.requireEntry === false || currentAuth()) { gate.classList.add("hide"); return; }
-    // configure buttons
-    var gbtn = $("#gate-google"), guest = $("#gate-guest");
-    if (auth.googleEnabled && auth.googleClientId) { gbtn.style.display = "inline-flex"; initGoogle(auth.googleClientId); }
+    var loginBtn = $("#gate-login"), regBtn = $("#gate-register"), guest = $("#gate-guest");
+    if (auth.googleEnabled && auth.googleClientId) {
+      loginBtn.style.display = "inline-flex"; regBtn.style.display = "inline-flex";
+      initGoogle(auth.googleClientId);
+    }
     if (auth.guestEnabled === false) { guest.style.display = "none"; }
     gate.classList.remove("hide");
     guest.addEventListener("click", function () { setAuth({ type: "guest", at: Date.now() }); gate.classList.add("hide"); });
-    gbtn.addEventListener("click", function () {
+    function googlePrompt() {
       if (window.google && google.accounts && google.accounts.id) { google.accounts.id.prompt(); }
       else { toast("Google sign-in not configured yet.", "err"); }
-    });
+    }
+    loginBtn.addEventListener("click", googlePrompt);
+    regBtn.addEventListener("click", googlePrompt);
   }
   function initGoogle(clientId) {
     // Loads Google Identity Services; requires the site's domain added as an

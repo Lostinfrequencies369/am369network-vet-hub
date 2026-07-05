@@ -15,6 +15,11 @@
 <!-- START / LOADER — dust particles forming the brand name -->
 <div id="loader">
   <canvas id="particle-canvas" aria-hidden="true"></canvas>
+  <div class="loader-glass">
+    <div class="ring"></div>
+    <div class="lt">Loading…</div>
+    <div class="ls">Please wait</div>
+  </div>
   <div class="loader-sub" id="loader-sub">Conceptualised by Dr. Ankit Malik</div>
   <div class="loader-bar"><i></i></div>
 </div>
@@ -29,13 +34,15 @@
       </svg>
     </div>
     <div class="gate-title">AM 369 Network</div>
-    <div class="gate-sub">Premium veterinary knowledge &amp; clinical reference</div>
-    <button class="gate-btn gate-google" id="gate-google" style="display:none">
+    <div class="gate-division">Veterinary Health Division</div>
+    <div class="gate-sub">Smart tools · Trusted references · Better decisions</div>
+    <button class="gate-btn gate-google" id="gate-login" style="display:none">
       <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.6 9.2c0-.6-.1-1.2-.2-1.8H9v3.4h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.7-3.9 2.7-6.5z"/><path fill="#34A853" d="M9 18c2.4 0 4.5-.8 6-2.2l-2.9-2.2c-.8.5-1.8.9-3.1.9-2.4 0-4.4-1.6-5.1-3.8H.9v2.3A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8z"/><path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z"/></svg>
-      Sign in with Google
+      Log in
     </button>
-    <button class="gate-btn gate-guest" id="gate-guest">Continue as Guest</button>
-    <div class="gate-note" id="gate-note">Guest access lets you browse everything. Sign in to save preferences and unlock member features later.</div>
+    <button class="gate-btn gate-register" id="gate-register" style="display:none">Register</button>
+    <button class="gate-btn gate-guest" id="gate-guest">Enter as Guest</button>
+    <div class="gate-note" id="gate-note">Guest access lets you explore everything without registration. Log in to save preferences and unlock member features.</div>
   </div>
 </div>
 
@@ -70,8 +77,8 @@
     <a class="drawer-link" href="#top"><span class="ic">🏠</span> Dashboard</a>
     <div class="drawer-link" id="dl-species"><span class="ic">🐾</span> Species Directory <span style="margin-left:auto;color:#5a6b88">›</span></div>
     <div class="drawer-sub" id="drawer-species" style="display:none"></div>
+    <a class="drawer-link" href="#modules"><span class="ic">🧩</span> Modules</a>
     <a class="drawer-link" href="#medicines"><span class="ic">💊</span> Drug Reference</a>
-    <a class="drawer-link" href="#systems"><span class="ic">🫀</span> Browse by System</a>
     <a class="drawer-link" href="#blogs"><span class="ic">📝</span> Blogs &amp; Articles</a>
     <a class="drawer-link" href="#directories"><span class="ic">📁</span> Directories &amp; Tools</a>
 
@@ -98,12 +105,12 @@
 
 <div class="wrap"><div id="ad-top" class="ad-slot hidden" data-slot="homeTop">Ad space</div></div>
 
-<!-- BROWSE BY SYSTEM -->
-<section class="block wrap" id="systems">
+<!-- MODULES (platform features) -->
+<section class="block wrap" id="modules">
   <div class="section-head reveal">
-    <div><div class="eyebrow" id="systems-eyebrow">Reference</div><h2 id="systems-title">Browse by Body System</h2></div>
+    <div><div class="eyebrow" id="modules-eyebrow">Platform</div><h2 id="modules-title">Powerful Veterinary Modules</h2></div>
   </div>
-  <div id="systems-grid" class="sys-grid stagger">
+  <div id="modules-grid" class="mod-grid stagger">
     <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
   </div>
 </section>
