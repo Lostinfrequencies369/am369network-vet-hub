@@ -9,7 +9,18 @@
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function lazyImg(url, alt) {
     if (!url) return '<div class="ph">🐾</div>';
-    return '<img loading="lazy" src="' + esc(url) + '" alt="' + esc(alt || "") + '" onerror="this.parentNode.innerHTML=\'<div class=&quot;ph&quot;>🐾</div>\'">';
+    // data-src holds the real URL; ImageCache resolves it to a cached blob URL after mount
+    return '<img loading="lazy" data-src="' + esc(url) + '" alt="' + esc(alt || "") + '" onerror="this.parentNode.innerHTML=\'<div class=&quot;ph&quot;>🐾</div>\'">';
+  }
+  // Upgrade every [data-src] image to a cached blob URL (memory -> IndexedDB -> network).
+  function hydrateImages(root) {
+    if (!window.ImageCache) return;
+    var imgs = (root || document).querySelectorAll("img[data-src]");
+    imgs.forEach(function (img) {
+      var url = img.getAttribute("data-src");
+      img.removeAttribute("data-src");
+      ImageCache.getObjectURL(url).then(function (resolved) { img.src = resolved || url; });
+    });
   }
 
   function toast(msg, kind) {
@@ -54,6 +65,7 @@
       c.appendChild(btn);
       host.appendChild(c);
     });
+    hydrateImages(host);
   }
 
   function renderBlogs() {
@@ -75,6 +87,7 @@
       c.appendChild(btn);
       host.appendChild(c);
     });
+    hydrateImages(host);
   }
 
   function renderDirectories() {
@@ -92,6 +105,7 @@
         '<div class="subfolders">' + subs + '</div>';
       host.appendChild(c);
     });
+    hydrateImages(host);
   }
 
   function renderSpeciesOptions() {
@@ -175,7 +189,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     wire();
-    var minTime = new Promise(function (res) { setTimeout(res, 2200); }); // premium reveal
+    var minTime = new Promise(function (res) { setTimeout(res, 2850); }); // matches particle formation + drift-out
     Promise.all([load(), minTime]).then(hideLoader);
   });
 })();

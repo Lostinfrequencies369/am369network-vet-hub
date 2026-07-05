@@ -53,6 +53,43 @@ Live at `https://<username>.github.io/<repo>/`.
 ## Android WebView
 All paths are relative and layout is mobile-first, so it loads cleanly inside a WebView wrapper. Buttons are touch-sized; no desktop-only features are required.
 
+## Custom domain (am369network.in)
+
+A `CNAME` file in the repo root already points GitHub Pages at `am369network.in`. At your domain registrar (Hostinger), add these DNS records:
+
+- **A records** for the root domain, all four:
+  ```
+  185.199.108.153
+  185.199.109.153
+  185.199.110.153
+  185.199.111.153
+  ```
+- **CNAME** for `www` → `lostinfrequencies369.github.io`
+
+Then in repo Settings → Pages, confirm the custom domain shows `am369network.in` and enable **Enforce HTTPS** once DNS has propagated (can take up to 24 hours).
+
+## Google Drive image upload (direct from admin)
+
+Every thumbnail field in the admin panel has an **Upload to Drive** button next to the URL box. It uploads straight into an auto-sorted Drive folder tree (`AM369 Network Media/Apps`, `/Blogs`, `/Directories`, `/Species/<name>`), then fills in a public view URL for you.
+
+**One-time setup:**
+1. Go to [script.google.com](https://script.google.com) → New project.
+2. Paste in the contents of `backend/DriveUploader.gs` from this repo.
+3. Run the `setup` function once (authorize Drive access when prompted).
+4. **Deploy → New deployment → Web app** — Execute as *Me*, Who has access *Anyone with the link*.
+5. Copy the deployment URL.
+6. In the admin panel: **Settings → Google Drive Upload** → paste the URL, confirm the shared key matches `ADMIN_KEY` in the script (default `AnkiMunky321`) → Save.
+
+No SQL, no paid backend — Drive itself is the file store, and folders are created automatically on first use per section/species.
+
+## Multi-level caching
+
+- **L1 — memory**: every JSON collection and every resolved image sits in an in-memory cache for the current tab (instant, no I/O).
+- **L2 — LocalStorage** (data) / **IndexedDB** (images): survives reloads and works offline. Data edits live here until exported; images are cached as actual blobs so repeat views load instantly even on a slow connection.
+- **L3 — network**: only hit on first load of a given JSON file or image; after that it's served from L1/L2.
+
+This is what makes the site feel instant on repeat visits and keeps Drive-hosted images fast even though Drive itself can be slow to serve on first request.
+
 ## Future backend upgrade path
 
 **Option A — Google Apps Script + Google Sheet**

@@ -5,6 +5,8 @@
   "logo": "assets/images/logo.png",
   "theme": "premium-dark",
   "schemaVersion": 1,
+  "driveUploadUrl": "",
+  "driveAdminKey": "AnkiMunky321",
   "ads": {
     "enabled": false,
     "provider": "none",

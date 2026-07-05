@@ -149,7 +149,7 @@
   }
 
   function renderAllTables() {
-    renderStats(); renderApps(); renderBlogs(); renderDirs(); renderSpecies(); renderAdsForm();
+    renderStats(); renderApps(); renderBlogs(); renderDirs(); renderSpecies(); renderAdsForm(); renderDriveForm();
   }
 
   /* ---------- modal engine ---------- */
@@ -180,7 +180,7 @@
         '<div class="field"><label>Category</label><input id="f-cat" value="' + esc(a.category) + '"></div>' +
         '<div class="field"><label>Button Text</label><input id="f-btn" value="' + esc(a.buttonText || "Open App") + '"></div>' +
       '</div>' +
-      '<div class="field"><label>Thumbnail URL</label><input id="f-thumb" value="' + esc(a.thumbnail) + '"><div class="hint">Paste an image URL (Drive/Imgur/etc). Leave blank for placeholder.</div></div>' +
+      thumbField("f-thumb", a.thumbnail) +
       '<div class="field"><label>Species relevance</label>' + speciesChips(a.species) + '</div>' +
       '<div class="form-row">' +
         '<div class="field"><label>Status</label><select id="f-status"><option value="active"' + (a.status !== "inactive" ? " selected" : "") + '>Active</option><option value="inactive"' + (a.status === "inactive" ? " selected" : "") + '>Inactive</option></select></div>' +
@@ -191,6 +191,7 @@
   function editApp(id) {
     var a = db.apps.find(function (x) { return x.id === id; });
     openModal(appForm(a)); wireChips();
+    wireDriveUpload("f-thumb", "Apps", function () { return $("#f-cat") ? $("#f-cat").value : ""; });
     $("#m-cancel").onclick = closeModal;
     $("#m-save").onclick = function () {
       var btn = this;
@@ -223,7 +224,7 @@
         '<div class="field"><label>Author</label><input id="f-author" value="' + esc(b.author || "Dr. Ankit Malik") + '"></div>' +
         '<div class="field"><label>Category</label><input id="f-cat" value="' + esc(b.category) + '"></div>' +
       '</div>' +
-      '<div class="field"><label>Thumbnail URL</label><input id="f-thumb" value="' + esc(b.thumbnail) + '"></div>' +
+      thumbField("f-thumb", b.thumbnail) +
       '<div class="field"><label>Summary</label><textarea id="f-sum">' + esc(b.summary) + '</textarea></div>' +
       '<div class="field"><label>Body</label><textarea id="f-body" style="min-height:140px">' + esc(b.body) + '</textarea></div>' +
       '<div class="field"><label>Tags (comma separated)</label><input id="f-tags" value="' + esc((b.tags||[]).join(", ")) + '"></div>' +
@@ -237,6 +238,7 @@
   function editBlog(id) {
     var b = db.blogs.find(function (x) { return x.id === id; });
     openModal(blogForm(b)); wireChips();
+    wireDriveUpload("f-thumb", "Blogs", function () { return $("#f-cat") ? $("#f-cat").value : ""; });
     $("#m-cancel").onclick = closeModal;
     $("#m-save").onclick = function () {
       var btn = this;
@@ -266,7 +268,7 @@
     return '<h3>' + (d.id ? "Edit" : "Add") + ' Directory</h3>' +
       '<div class="field"><label>Title</label><input id="f-title" value="' + esc(d.title) + '"></div>' +
       '<div class="field"><label>Description</label><textarea id="f-desc">' + esc(d.description) + '</textarea></div>' +
-      '<div class="field"><label>Thumbnail URL</label><input id="f-thumb" value="' + esc(d.thumbnail) + '"></div>' +
+      thumbField("f-thumb", d.thumbnail) +
       '<div class="field"><label>Subfolders (one per line)</label><textarea id="f-subs" style="min-height:120px">' + esc(subs) + '</textarea></div>' +
       '<div class="field"><label>Species</label>' + speciesChips(d.species) + '</div>' +
       '<div class="modal-foot"><button class="btn btn-ghost" id="m-cancel">Cancel</button><button class="btn btn-primary" id="m-save">Save</button></div>';
@@ -274,6 +276,7 @@
   function editDir(id) {
     var d = db.directories.find(function (x) { return x.id === id; });
     openModal(dirForm(d)); wireChips();
+    wireDriveUpload("f-thumb", "Directories", function () { return $("#f-title") ? $("#f-title").value : ""; });
     $("#m-cancel").onclick = closeModal;
     $("#m-save").onclick = function () {
       var btn = this;
@@ -299,12 +302,13 @@
     return '<h3>' + (s.id ? "Edit" : "Add") + ' Species</h3>' +
       '<div class="field"><label>Name</label><input id="f-name" value="' + esc(s.name) + '"></div>' +
       '<div class="field"><label>Description</label><textarea id="f-desc">' + esc(s.description) + '</textarea></div>' +
-      '<div class="field"><label>Thumbnail URL</label><input id="f-thumb" value="' + esc(s.thumbnail) + '"></div>' +
+      thumbField("f-thumb", s.thumbnail) +
       '<div class="modal-foot"><button class="btn btn-ghost" id="m-cancel">Cancel</button><button class="btn btn-primary" id="m-save">Save</button></div>';
   }
   function editSp(id) {
     var s = db.species.find(function (x) { return x.id === id; });
     openModal(spForm(s));
+    wireDriveUpload("f-thumb", "Species", function () { return $("#f-name") ? $("#f-name").value : ""; });
     $("#m-cancel").onclick = closeModal;
     $("#m-save").onclick = function () {
       var btn = this;
@@ -325,6 +329,78 @@
       '<div class="modal-foot"><button class="btn btn-ghost" id="m-cancel">Cancel</button><button class="btn btn-danger" id="m-yes">Delete</button></div>');
     $("#m-cancel").onclick = closeModal;
     $("#m-yes").onclick = function () { withBusy(this, "Deleting…", function () { onYes(); closeModal(); }); };
+  }
+
+  /* ---------- Google Drive upload ---------- */
+  function driveConfig() {
+    var s = db.settings || {};
+    return { url: s.driveUploadUrl || "", key: s.driveAdminKey || DEMO_PASSCODE };
+  }
+  function fileToBase64(file) {
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { res(r.result); };
+      r.onerror = rej;
+      r.readAsDataURL(file);
+    });
+  }
+  function uploadToDrive(file, section, subfolder) {
+    var cfg = driveConfig();
+    if (!cfg.url) return Promise.reject(new Error("Set Drive Upload URL in Settings first."));
+    return fileToBase64(file).then(function (dataUrl) {
+      return fetch(cfg.url, {
+        method: "POST",
+        body: JSON.stringify({ key: cfg.key, filename: file.name, mimeType: file.type, dataBase64: dataUrl, section: section, subfolder: subfolder || "" })
+      });
+    }).then(function (r) { return r.json(); }).then(function (json) {
+      if (!json.ok) throw new Error(json.error || "Upload failed");
+      return json.url;
+    });
+  }
+  /* Wires a "file + upload" control next to a thumbnail text field. */
+  function wireDriveUpload(fieldId, section, subfolderGetter) {
+    var wrap = document.getElementById(fieldId + "-wrap");
+    if (!wrap) return;
+    var fileInput = wrap.querySelector('input[type="file"]');
+    var btn = wrap.querySelector("button");
+    var textInput = document.getElementById(fieldId);
+    btn.addEventListener("click", function () { fileInput.click(); });
+    fileInput.addEventListener("change", function () {
+      var file = fileInput.files[0]; if (!file) return;
+      withBusy(btn, "Uploading…", function () {
+        return uploadToDrive(file, section, subfolderGetter ? subfolderGetter() : "").then(function (url) {
+          textInput.value = url; toast("Uploaded to Drive.", "ok");
+        });
+      });
+    });
+  }
+  function thumbField(id, value, label) {
+    return '<div class="field"><label>' + (label || "Thumbnail URL") + '</label>' +
+      '<input id="' + id + '" value="' + esc(value) + '">' +
+      '<div id="' + id + '-wrap" style="display:flex;gap:8px;margin-top:8px;align-items:center">' +
+        '<input type="file" accept="image/*" style="display:none">' +
+        '<button type="button" class="btn btn-ghost btn-sm">Upload to Drive</button>' +
+        '<span class="hint">or paste a URL above</span>' +
+      '</div></div>';
+  }
+
+  /* ---------- drive settings ---------- */
+  function renderDriveForm() {
+    var host = $("#drive-form"); if (!host) return;
+    var s = db.settings || {};
+    host.innerHTML =
+      '<div class="field"><label>Web App URL (from Apps Script deployment)</label><input id="drive-url" value="' + esc(s.driveUploadUrl || "") + '" placeholder="https://script.google.com/macros/s/.../exec"></div>' +
+      '<div class="field"><label>Shared key (must match ADMIN_KEY in the script)</label><input id="drive-key" value="' + esc(s.driveAdminKey || "") + '"></div>' +
+      '<p class="hint" style="margin-bottom:14px">Deploy <code>backend/DriveUploader.gs</code> from the repo as an Apps Script Web App, then paste its URL here. See README for step-by-step deployment.</p>' +
+      '<button class="btn btn-primary" id="drive-save">Save Drive settings</button>';
+    $("#drive-save").onclick = function () {
+      var btn = this;
+      withBusy(btn, "Saving…", function () {
+        db.settings.driveUploadUrl = $("#drive-url").value.trim();
+        db.settings.driveAdminKey = $("#drive-key").value.trim();
+        save("settings"); toast("Drive settings saved.", "ok");
+      });
+    };
   }
 
   /* ---------- ads settings ---------- */

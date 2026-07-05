@@ -12,16 +12,9 @@
 </head>
 <body>
 
-<!-- START / LOADER -->
+<!-- START / LOADER — dust particles forming the brand name -->
 <div id="loader">
-  <svg class="loader-mark" viewBox="0 0 76 76" fill="none">
-    <circle cx="38" cy="38" r="35" stroke="url(#g)" stroke-width="3"/>
-    <path d="M38 16 L38 60 M22 28 Q38 20 54 28 M22 48 Q38 56 54 48" stroke="url(#g)" stroke-width="3" fill="none"/>
-    <defs><linearGradient id="g" x1="0" y1="0" x2="76" y2="76">
-      <stop stop-color="#3DD8E6"/><stop offset="1" stop-color="#9A6BFF"/>
-    </linearGradient></defs>
-  </svg>
-  <div class="loader-title">AM 369 Network</div>
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
   <div class="loader-sub">Designed by Dr. Ankit Malik</div>
   <div class="loader-bar"><i></i></div>
 </div>
@@ -113,6 +106,7 @@
 
 <div id="toasts"></div>
 
+<script src="assets/js/particles.js"></script>
 <script src="assets/js/data-service.js"></script>
 <script src="assets/js/app.js"></script>
 </body>

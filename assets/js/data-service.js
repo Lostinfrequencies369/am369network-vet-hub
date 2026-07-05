@@ -123,4 +123,68 @@
     importAll: importAll,
     clearCache: clearCache
   };
+
+  /* -----------------------------------------------------------
+   * ImageCache — multi-level cache for Drive/remote thumbnails
+   * L1: in-memory Map (instant, cleared on reload)
+   * L2: IndexedDB blob store (persistent across sessions/offline)
+   * L3: network fetch (first load only, then written to L1+L2)
+   * Usage: ImageCache.getObjectURL(url).then(function(objUrl){ img.src = objUrl; })
+   * ----------------------------------------------------------- */
+  var DB_NAME = "am369_media_cache", STORE = "images", DB_VERSION = 1;
+  var memImg = new Map();
+  var dbPromise = null;
+
+  function openDb() {
+    if (dbPromise) return dbPromise;
+    if (!("indexedDB" in window)) { dbPromise = Promise.resolve(null); return dbPromise; }
+    dbPromise = new Promise(function (resolve) {
+      var req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = function () {
+        if (!req.result.objectStoreNames.contains(STORE)) req.result.createObjectStore(STORE);
+      };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { resolve(null); };
+    });
+    return dbPromise;
+  }
+  function idbGet(key) {
+    return openDb().then(function (db) {
+      if (!db) return null;
+      return new Promise(function (resolve) {
+        var tx = db.transaction(STORE, "readonly").objectStore(STORE).get(key);
+        tx.onsuccess = function () { resolve(tx.result || null); };
+        tx.onerror = function () { resolve(null); };
+      });
+    });
+  }
+  function idbSet(key, blob) {
+    return openDb().then(function (db) {
+      if (!db) return;
+      try { db.transaction(STORE, "readwrite").objectStore(STORE).put(blob, key); } catch (e) {}
+    });
+  }
+
+  function getObjectURL(url) {
+    if (!url) return Promise.resolve("");
+    if (memImg.has(url)) return Promise.resolve(memImg.get(url));
+    return idbGet(url).then(function (blob) {
+      if (blob) {
+        var objUrl = URL.createObjectURL(blob);
+        memImg.set(url, objUrl);
+        return objUrl;
+      }
+      return fetch(url, { mode: "cors" }).then(function (r) {
+        if (!r.ok) throw new Error("image fetch failed");
+        return r.blob();
+      }).then(function (b) {
+        idbSet(url, b);
+        var objUrl = URL.createObjectURL(b);
+        memImg.set(url, objUrl);
+        return objUrl;
+      }).catch(function () { return url; }); // fall back to direct URL (e.g. CORS-blocked hosts)
+    });
+  }
+
+  global.ImageCache = { getObjectURL: getObjectURL };
 })(window);
